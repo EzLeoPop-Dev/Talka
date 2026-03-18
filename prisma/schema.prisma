@@ -1,0 +1,244 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model User {
+  user_id       Int        @id @default(autoincrement())
+  first_name    String
+  last_name     String
+  email         String     @unique
+  password      String
+  role          Role       @default(USER)
+  profile_image String?
+  online_status UserStatus @default(OFFLINE)
+  created_at    DateTime   @default(now())
+
+  teams         TeamMember[]
+  assignments   Assignment[]
+  notes         Note[]
+  activity_logs ActivityLog[]
+  chat_sessions ChatSession[] @relation("AssignedAgent")
+}
+
+model Team {
+  team_id     Int          @id @default(autoincrement())
+  team_name   String
+  description String?
+
+  members     TeamMember[]
+}
+
+model TeamMember {
+  team_member_id Int  @id @default(autoincrement())
+
+  team_id Int
+  user_id Int
+
+  team Team @relation(fields: [team_id], references: [team_id])
+  user User @relation(fields: [user_id], references: [user_id])
+}
+
+model Customer {
+  customer_id Int      @id @default(autoincrement())
+  name        String
+  email       String?
+  phone       String?
+  company     String?
+  country     String?
+  created_at  DateTime @default(now())
+
+  social_accounts CustomerSocialAccount[]
+  chat_sessions   ChatSession[]
+  tags            CustomerTag[]
+}
+
+model Platform {
+  platform_id   Int      @id @default(autoincrement())
+  platform_name String
+
+  chat_sessions ChatSession[]
+  social_links  CustomerSocialAccount[]
+}
+
+model CustomerSocialAccount {
+  social_account_id Int @id @default(autoincrement())
+
+  customer_id Int
+  platform_id Int
+
+  account_identifier String
+
+  customer Customer @relation(fields: [customer_id], references: [customer_id])
+  platform Platform @relation(fields: [platform_id], references: [platform_id])
+}
+
+model ChatSession {
+  chat_session_id Int      @id @default(autoincrement())
+
+  customer_id Int
+  platform_id Int
+
+  assigned_user_id Int?
+
+  status     ChatStatus @default(OPEN)
+  start_time DateTime   @default(now())
+  end_time   DateTime?
+
+  customer Customer @relation(fields: [customer_id], references: [customer_id])
+  platform Platform @relation(fields: [platform_id], references: [platform_id])
+
+  assigned_user User? @relation("AssignedAgent", fields: [assigned_user_id], references: [user_id])
+
+  messages   Message[]
+  notes      Note[]
+  assignments Assignment[]
+  tags       ChatTag[]
+  logs       ActivityLog[]
+}
+
+model Message {
+  message_id Int      @id @default(autoincrement())
+
+  chat_session_id Int
+
+  sender_type SenderType
+  sender_id   Int?
+
+  message_type MessageType
+  content      String?
+
+  attachment_url String?
+
+  created_at DateTime @default(now())
+  read_at    DateTime?
+
+  chat_session ChatSession @relation(fields: [chat_session_id], references: [chat_session_id])
+}
+
+model Note {
+  note_id Int @id @default(autoincrement())
+
+  chat_session_id Int
+  user_id         Int
+
+  title   String?
+  content String
+
+  created_at DateTime @default(now())
+
+  chat_session ChatSession @relation(fields: [chat_session_id], references: [chat_session_id])
+  user         User        @relation(fields: [user_id], references: [user_id])
+}
+
+model Assignment {
+  assignment_id Int @id @default(autoincrement())
+
+  chat_session_id Int
+  user_id         Int
+
+  topic    String?
+  detail   String?
+  deadline DateTime?
+  status   AssignmentStatus @default(PENDING)
+
+  chat_session ChatSession @relation(fields: [chat_session_id], references: [chat_session_id])
+  user         User        @relation(fields: [user_id], references: [user_id])
+}
+
+model Tag {
+  tag_id Int @id @default(autoincrement())
+
+  tag_name    String
+  color       String?
+  description String?
+
+  customers CustomerTag[]
+  chats     ChatTag[]
+}
+
+model CustomerTag {
+  customer_tag_id Int @id @default(autoincrement())
+
+  customer_id Int
+  tag_id      Int
+
+  customer Customer @relation(fields: [customer_id], references: [customer_id])
+  tag      Tag      @relation(fields: [tag_id], references: [tag_id])
+}
+
+model ChatTag {
+  chat_tag_id Int @id @default(autoincrement())
+
+  chat_session_id Int
+  tag_id          Int
+
+  chat ChatSession @relation(fields: [chat_session_id], references: [chat_session_id])
+  tag  Tag         @relation(fields: [tag_id], references: [tag_id])
+}
+
+model ActivityLog {
+  log_id Int @id @default(autoincrement())
+
+  user_id Int?
+  chat_session_id Int?
+
+  action    String
+  old_value String?
+  new_value String?
+
+  created_at DateTime @default(now())
+
+  user User? @relation(fields: [user_id], references: [user_id])
+  chat ChatSession? @relation(fields: [chat_session_id], references: [chat_session_id])
+}
+
+enum Role {
+  USER
+  ADMIN
+  EMPLOYEE
+  MANAGER
+}
+
+enum UserStatus {
+  ONLINE
+  OFFLINE
+  AWAY
+}
+
+enum SenderType {
+  CUSTOMER
+  AGENT
+  BOT
+  SYSTEM
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+  VIDEO
+  AUDIO
+}
+
+enum ChatStatus {
+  OPEN
+  PENDING
+  CLOSED
+  RESOLVED
+}
+
+enum AssignmentStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
+}

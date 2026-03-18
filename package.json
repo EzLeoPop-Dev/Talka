@@ -1,0 +1,50 @@
+{
+  "name": "talka-project",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build --turbopack",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@carousel-ui/react-spin-carousel-3d": "^1.0.18",
+    "@prisma/adapter-mariadb": "^7.5.0",
+    "@prisma/client": "^7.5.0",
+    "@radix-ui/react-tooltip": "^1.2.8",
+    "@tailwindcss/postcss": "^4.1.15",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "dotenv": "^17.3.1",
+    "emoji-picker-react": "^4.15.0",
+    "framer-motion": "^12.23.24",
+    "git": "^0.1.5",
+    "gsap": "^3.13.0",
+    "jspdf": "^3.0.4",
+    "jspdf-autotable": "^5.0.2",
+    "lucide-react": "^0.546.0",
+    "mathjs": "^15.1.0",
+    "motion": "^12.23.24",
+    "next": "15.5.4",
+    "ogl": "^1.0.11",
+    "react": "19.1.0",
+    "react-date-range": "^2.0.1",
+    "react-dom": "19.1.0",
+    "react-tooltip": "^5.30.0",
+    "recharts": "^3.4.1",
+    "tailwind-merge": "^3.3.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.4",
+    "postcss": "^8.5.6",
+    "prisma": "^7.5.0",
+    "tailwindcss": "^4.1.16",
+    "tailwindcss-animate": "^1.0.7"
+  }
+}

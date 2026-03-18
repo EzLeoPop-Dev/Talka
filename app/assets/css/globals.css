@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+ิ.bodyColor {
+background-color:rgba(32,41,59,0.37);
+border: solid 1px rgba(254,253,253,0.5);
+backdrop-filter: blur(20px);
+border-radius: 1.5rem;
+box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+border-radius: 1.5rem;
+}
