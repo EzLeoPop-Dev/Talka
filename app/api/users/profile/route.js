@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"; 
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 
-// ---------------------------------------------------------
-// 1. [GET] สำหรับดึงข้อมูลมาโชว์ (แก้บัค 405 ที่เจอใน Log)
-// ---------------------------------------------------------
 export async function GET(request) {
   try {
     const session = await getServerSession(authOptions);

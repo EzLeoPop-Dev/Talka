@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev -p 3001",
-    "build": "prisma generate && next build",
-    "postinstall": "prisma generate",
+    "vercel-build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
     "lint": "eslint"
   },
@@ -33,12 +32,14 @@
     "motion": "^12.23.24",
     "next": "15.5.4",
     "next-auth": "^4.24.13",
+    "next-swagger-doc": "^0.4.1",
     "ogl": "^1.0.11",
     "react": "19.1.0",
     "react-date-range": "^2.0.1",
     "react-dom": "19.1.0",
     "react-tooltip": "^5.30.0",
     "recharts": "^3.4.1",
+    "swagger-ui-react": "^5.32.1",
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
