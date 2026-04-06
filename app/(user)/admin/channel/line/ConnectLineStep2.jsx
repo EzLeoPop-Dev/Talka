@@ -1,98 +1,153 @@
 "use client";
-import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
+import { ArrowLeft, CheckCircle2, Zap, Shield, ChevronRight, Key, ClipboardList } from "lucide-react";
 
 export default function ConnectLineStep2({ onBack, onNext }) {
   const [checked, setChecked] = useState(false);
+  const [channelId, setChannelId] = useState("");
+  const [channelSecret, setChannelSecret] = useState("");
 
   return (
-    <div className="w-full h-[94vh] bg-[rgba(32,41,59,0.37)] border border-white/20 backdrop-blur-xl rounded-3xl shadow-2xl p-10 text-white relative">
-      <button
-        onClick={onBack}
-        className="absolute top-6 left-6 flex items-center gap-2 text-white/70 hover:text-white transition-colors cursor-pointer"
-      >
-        <ArrowLeft size={18} />
-        <span className="text-sm font-medium">Back</span>
-      </button>
+    <div className="w-full h-full min-h-[90vh] p-4 md:p-8  font-sans relative overflow-hidden animate-in fade-in duration-500">
+      
+      {/* Background Decorative Blur */}
+      <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] bg-white/20 blur-[120px] rounded-full pointer-events-none"></div>
 
-      <h1 className="text-2xl font-semibold mb-1 mt-8">
-        Connect LINE Official Account
-      </h1>
-      <p className="text-white/70 mb-8 text-sm leading-relaxed">
-        Follow the instructions to get channel details.
-      </p>
+      {/* --- MAIN CONTAINER --- */}
+      <div className="relative z-10 bg-white border border-white/40 rounded-[2.5rem] shadow-[0_40px_80px_-15px_rgba(0,0,0,0.1)] h-full flex flex-col overflow-hidden">
+        
+        {/* Top Navigation */}
+        <div className="p-8 md:p-10 pb-0 shrink-0 flex justify-between items-center">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-3 text-slate-400 hover:text-[#06C755] transition-all group font-bold text-sm uppercase tracking-wider"
+          >
+            <div className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center shadow-sm group-hover:bg-[#06C755]/5 transition-all border border-slate-100">
+              <ArrowLeft size={20} />
+            </div>
+            <span>Back</span>
+          </button>
 
-      {/* Step indicator */}
-      <div className="flex gap-4 mb-8">
-        <div className="flex items-center gap-2 opacity-60">
-          <div className="bg-green-900 px-3 py-1.5 rounded-lg text-sm font-semibold">
-            <span className="bg-green-400 px-2 rounded-full text-sm font-semibold">
-              1
-            </span>{" "}
-            &nbsp;<span>Configure Channel</span>
+          <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 border border-slate-100 text-[11px] font-bold uppercase tracking-widest text-slate-500">
+            <Shield size={14} className="text-[#06C755]" />
+            <span>Secure Data Entry</span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="bg-blue-600 px-3 py-1.5 rounded-lg text-sm font-semibold">
-            <span className="bg-blue-800 px-2 rounded-full text-sm font-semibold">
-              2
-            </span>{" "}
-            &nbsp;<span>Get Channel Information</span>
+
+        {/* --- CONTENT AREA --- */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-8 md:p-10">
+          <div className="max-w-3xl mx-auto">
+            
+            {/* Header Section */}
+            <div className="mb-10">
+              <div className="inline-flex items-center gap-2 text-[#06C755] mb-3 bg-[#06C755]/5 px-3 py-1 rounded-full">
+                <Key size={16} />
+                <span className="text-[11px] font-black uppercase tracking-[0.2em]">Step 2 of 3</span>
+              </div>
+              <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">Channel Information</h1>
+              <p className="text-slate-500 text-base mt-2 font-medium">ระบุข้อมูล Channel ID และ Channel Secret จากหน้า Basic Settings</p>
+            </div>
+
+            {/* Step Indicator (Updated) */}
+            <div className="flex items-center gap-4 mb-10 overflow-x-auto pb-2">
+              <div className="flex items-center gap-2 shrink-0">
+                <div className="w-8 h-8 rounded-full bg-[#06C755] flex items-center justify-center text-white shadow-lg shadow-[#06C755]/20">
+                  <CheckCircle2 size={16} />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Configure</span>
+              </div>
+              <div className="w-8 h-px bg-[#06C755]"></div>
+              <div className="flex items-center gap-2 shrink-0">
+                <div className="w-8 h-8 rounded-full bg-[#06C755] border-2 border-[#06C755] flex items-center justify-center text-white font-black text-xs shadow-lg shadow-[#06C755]/20">
+                  2
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-900">Information</span>
+              </div>
+              <div className="w-8 h-px bg-slate-100"></div>
+              <div className="flex items-center gap-2 shrink-0 opacity-30">
+                <div className="w-8 h-8 rounded-full border-2 border-slate-300 flex items-center justify-center text-slate-400 font-black text-xs">
+                  3
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Webhook</span>
+              </div>
+            </div>
+
+            {/* Instructions & Inputs */}
+            <div className="space-y-6 mb-10">
+              <div className="flex items-start gap-4">
+                <div className="w-6 h-6 rounded-lg bg-slate-100 text-slate-400 text-[10px] font-black flex items-center justify-center shrink-0 mt-1">1</div>
+                <p className="text-slate-700 text-[16px] font-semibold">ไปที่หน้า LINE Developer Console แล้วเลือก Provider และ Channel ที่สร้างไว้</p>
+              </div>
+
+              <div className="flex items-start gap-4 group">
+                <div className="w-6 h-6 rounded-lg bg-slate-100 text-slate-400 text-[10px] font-black flex items-center justify-center shrink-0 mt-1 group-focus-within:bg-[#06C755] group-focus-within:text-white transition-all">2</div>
+                <div className="flex-1">
+                  <p className="text-slate-700 text-[16px] font-semibold mb-3">ไปที่หัวข้อ Basic Settings แล้วคัดลอก Channel ID มาวาง:</p>
+                  <input
+                    type="text"
+                    placeholder="เช่น 1653792148"
+                    value={channelId}
+                    onChange={(e) => setChannelId(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-100 focus:border-[#06C755]/50 focus:bg-white focus:ring-4 focus:ring-[#06C755]/5 outline-none rounded-2xl px-5 py-4 text-slate-700 font-bold transition-all placeholder:text-slate-300"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4 group">
+                <div className="w-6 h-6 rounded-lg bg-slate-100 text-slate-400 text-[10px] font-black flex items-center justify-center shrink-0 mt-1 group-focus-within:bg-[#06C755] group-focus-within:text-white transition-all">3</div>
+                <div className="flex-1">
+                  <p className="text-slate-700 text-[16px] font-semibold mb-3">เลื่อนลงมาที่หัวข้อ Channel Secret แล้วกด Issue เพื่อรับรหัส:</p>
+                  <input
+                    type="password"
+                    placeholder="เช่น 2f7f2dc47c..."
+                    value={channelSecret}
+                    onChange={(e) => setChannelSecret(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-100 focus:border-[#06C755]/50 focus:bg-white focus:ring-4 focus:ring-[#06C755]/5 outline-none rounded-2xl px-5 py-4 text-slate-700 font-bold transition-all placeholder:text-slate-300"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Confirmation & Action */}
+            <div className="bg-slate-50/80 rounded-[2.5rem] p-6 md:p-8 border border-slate-100">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <label className="flex items-center gap-4 cursor-pointer group">
+                  <div className="relative flex items-center justify-center">
+                    <input
+                      type="checkbox"
+                      className="peer appearance-none w-7 h-7 rounded-xl border-2 border-slate-200 checked:bg-[#06C755] checked:border-[#06C755] transition-all cursor-pointer shadow-sm"
+                      checked={checked}
+                      onChange={(e) => setChecked(e.target.checked)}
+                    />
+                    <CheckCircle2 size={16} className="absolute text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
+                  </div>
+                  <span className={`text-base font-bold tracking-tight transition-colors ${checked ? 'text-slate-900' : 'text-slate-400'}`}>
+                    ฉันกรอกข้อมูลครบถ้วนและถูกต้องแล้ว
+                  </span>
+                </label>
+
+                <button
+                  disabled={!checked || !channelId || !channelSecret}
+                  onClick={onNext}
+                  className={`flex items-center gap-3 px-10 py-4 rounded-2xl font-bold text-sm transition-all
+                    ${checked && channelId && channelSecret
+                      ? 'bg-[#06C755] text-white shadow-xl shadow-[#06C755]/20 hover:scale-[1.03] active:scale-95' 
+                      : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                    }`}
+                >
+                  ดำเนินการต่อ
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-2 opacity-60">
-          <div className="bg-gray-700 px-4 py-1.5 rounded-lg text-sm font-semibold">
-            <span className="bg-gray-900 px-2 rounded-full text-sm font-semibold">
-              3
-            </span>{" "}
-            &nbsp;<span>Enable Webhook</span>
-          </div>
+
+        {/* Footer */}
+        <div className="py-4 text-center border-t border-slate-50 bg-slate-50/50">
+            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-slate-300">Channel Credentials Protection Active</p>
         </div>
       </div>
-
-      <ol className="list-decimal list-inside space-y-4 text-white/80 mb-6">
-        <li>Navigate to LINE Developer Console.</li>
-        <li>Select the Provider created.</li>
-        <li>Select the Channel to connect.</li>
-        <li>
-          Navigate to <b>Basic Settings</b>, and add your Channel ID:
-          <input
-            type="text"
-            placeholder="Add Channel ID here e.g. 1653792148"
-            className="mt-2 w-full bg-transparent border border-white/20 rounded-lg px-3 py-2 text-sm text-white/80"
-          />
-        </li>
-        <li>
-          Scroll down to issue a <b>Channel Secret</b>:
-          <input
-            type="text"
-            placeholder="Add Channel Secret here e.g. 2f7f2dc47c..."
-            className="mt-2 w-full bg-transparent border border-white/20 rounded-lg px-3 py-2 text-sm text-white/80"
-          />
-        </li>
-      </ol>
-
-      <div className="flex items-center gap-3 mb-6">
-        <input
-          type="checkbox"
-          className="accent-blue-500 w-5 h-5 cursor-pointer"
-          checked={checked}
-          onChange={(e) => setChecked(e.target.checked)}
-        />
-        <label>I have completed the actions above.</label>
-      </div>
-
-      <button
-        disabled={!checked}
-        onClick={onNext}
-        className={`px-6 py-2.5 rounded-lg transition-all ${
-          checked
-            ? "bg-blue-600 hover:bg-blue-700 cursor-pointer"
-            : "bg-gray-700 text-white/50 cursor-not-allowed"
-        }`}
-      >
-        Next
-      </button>
     </div>
   );
 }
