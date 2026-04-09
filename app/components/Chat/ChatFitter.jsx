@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 
 export default function ChatFitter({ onFilterChange, availableCompanies = [], onCompanyChange, onSearchChange }) {
     const [selected, setSelected] = useState("radio1");
-    
+
     const [isCompanyOpen, setIsCompanyOpen] = useState(false);
     const [selectedCompany, setSelectedCompany] = useState(null);
     const dropdownRef = useRef(null);
@@ -34,7 +34,7 @@ export default function ChatFitter({ onFilterChange, availableCompanies = [], on
     return (
         // 🎨 เพิ่ม Background, Shadow, และปรับให้เป็นกล่อง Control Bar ที่ดูมีมิติ
         <div className="flex flex-col lg:flex-row bg-[#1E1B29] border border-[#BE7EC7]/10 shadow-lg rounded-3xl p-3 w-full gap-4 items-center justify-between">
-            
+
             {/* Search Bar */}
             <div className="flex items-center text-white/50 bg-[#120F18] border border-white/5 focus-within:border-[#BE7EC7]/50 focus-within:text-[#BE7EC7] rounded-2xl py-2.5 px-4 w-full lg:max-w-[280px] shrink-0 transition-all shadow-inner">
                 <i className="fa-solid fa-magnifying-glass mr-3"></i>
@@ -51,18 +51,17 @@ export default function ChatFitter({ onFilterChange, availableCompanies = [], on
                 {[
                     { id: "radio1", label: "All Chat", value: "All" },
                     { id: "radio2", label: "New Chat", value: "New Chat" },
-                    { id: "radio3", label: "Open", value: "Open" }, 
-                    { id: "radio4", label: "Closed", value: "Closed" },
-                    { id: "radio5", label: "Pending", value: "Pending" },
+                    { id: "radio3", label: "Open", value: "OPEN" },       // <-- เปลี่ยนจาก "Open" เป็น "OPEN"
+                    { id: "radio4", label: "Closed", value: "CLOSED" },   // <-- เปลี่ยนจาก "Closed" เป็น "CLOSED"
+                    { id: "radio5", label: "Pending", value: "PENDING" }, // <-- เปลี่ยนจาก "Pending" เป็น "PENDING"
                 ].map((item) => (
                     <button
                         key={item.id}
                         onClick={() => handleRadioChange(item.id, item.value)}
-                        className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-300 ${
-                            selected === item.id 
-                                ? 'bg-[#BE7EC7] text-white shadow-md shadow-[#BE7EC7]/20 scale-100' 
+                        className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-300 ${selected === item.id
+                                ? 'bg-[#BE7EC7] text-white shadow-md shadow-[#BE7EC7]/20 scale-100'
                                 : 'text-white/50 hover:text-white hover:bg-white/5 scale-95 hover:scale-100'
-                        }`}
+                            }`}
                     >
                         {item.label}
                     </button>
@@ -71,11 +70,11 @@ export default function ChatFitter({ onFilterChange, availableCompanies = [], on
 
             {/* Company Dropdown */}
             <div className="relative shrink-0 w-full lg:w-auto" ref={dropdownRef}>
-                <button 
+                <button
                     onClick={() => setIsCompanyOpen(!isCompanyOpen)}
                     className={`w-full lg:w-auto flex items-center justify-between gap-3 px-5 py-2.5 rounded-2xl text-sm font-medium transition-all border
-                        ${selectedCompany 
-                            ? 'bg-[#BE7EC7]/10 text-[#BE7EC7] border-[#BE7EC7]/30 shadow-sm' 
+                        ${selectedCompany
+                            ? 'bg-[#BE7EC7]/10 text-[#BE7EC7] border-[#BE7EC7]/30 shadow-sm'
                             : 'bg-[#120F18] text-white/60 border-white/5 hover:border-white/20 hover:text-white shadow-inner'
                         }
                     `}
@@ -85,7 +84,7 @@ export default function ChatFitter({ onFilterChange, availableCompanies = [], on
                         <span className="max-w-[120px] truncate">{selectedCompany || "All Companies"}</span>
                     </div>
                     {selectedCompany ? (
-                        <div 
+                        <div
                             className="flex items-center justify-center w-5 h-5 rounded-full hover:bg-red-500/20 text-white/50 hover:text-red-400 transition-colors"
                             onClick={(e) => { e.stopPropagation(); handleCompanySelect(null); }}
                         >
@@ -103,14 +102,14 @@ export default function ChatFitter({ onFilterChange, availableCompanies = [], on
                             <span className="text-[10px] text-white/40 uppercase font-bold tracking-widest ml-2">Filter by Company</span>
                         </div>
                         <div className="max-h-[220px] overflow-y-auto custom-scrollbar p-2 space-y-1">
-                            <button 
+                            <button
                                 onClick={() => handleCompanySelect(null)}
                                 className={`w-full text-left px-3 py-2.5 text-sm rounded-xl transition-all flex items-center justify-between ${!selectedCompany ? 'bg-[#BE7EC7]/20 text-[#BE7EC7] font-semibold' : 'text-white/60 hover:bg-white/5 hover:text-white'}`}
                             >
                                 All Companies
                                 {!selectedCompany && <i className="fa-solid fa-check text-[10px]"></i>}
                             </button>
-                            
+
                             {availableCompanies.length > 0 ? (
                                 availableCompanies.map((comp) => (
                                     <button

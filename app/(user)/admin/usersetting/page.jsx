@@ -4,8 +4,11 @@ import {
   User, Users, Search, Plus, Trash2, Check, ShieldCheck 
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 
 export default function UserSettingPage() {
+  const { data: session } = useSession();
+  
   const [users, setUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -19,29 +22,47 @@ export default function UserSettingPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const mockMe = {
-          id: 999,
-          name: "Somchai Admin",
-          email: "admin@workspace.com",
-          role: "Owner"
-        };
-        const mockOthers = [
-          { id: 1, name: "Employee A", email: "emp.a@example.com", role: "Manager" },
-          { id: 2, name: "Employee B", email: "emp.b@example.com", role: "Employee" }
-        ];
-        setCurrentUser(mockMe);
-        setUsers(mockOthers);
-      } catch (error) {
-        console.error("Error loading users data", error);
-      } finally {
-        setIsLoaded(true);
-      }
-    };
     fetchUserData();
-  }, []);
+  }, [session]);
+
+  const fetchUserData = async () => {
+    try {
+      setIsLoaded(false);
+      const response = await fetch("/api/users");
+      if (!response.ok) throw new Error("Failed to fetch users");
+      
+      const allUsers = await response.json();
+      
+      // ดึง current user จาก session
+      if (session?.user?.email) {
+        // หา user ที่ตรงกับ email จาก session
+        const currentUserFromList = allUsers.find(u => u.email === session.user.email);
+        if (currentUserFromList) {
+          setCurrentUser(currentUserFromList);
+          // คัดออก current user จาก list
+          const otherUsers = allUsers.filter(u => u.email !== session.user.email);
+          setUsers(otherUsers);
+        } else {
+          // ถ้าหาไม่เจอให้ใช้ทั้งหมด (ป้องกันข้อมูลหาย)
+          setUsers(allUsers);
+          setCurrentUser(null);
+        }
+      } else {
+        // ถ้าไม่มี session ให้ใช้ทั้งหมด
+        setUsers(allUsers);
+        setCurrentUser(null);
+      }
+    } catch (error) {
+      console.error("Error loading users data", error);
+      setError("Failed to load users");
+    } finally {
+      setIsLoaded(true);
+    }
+  };
 
   const displayUsers = currentUser ? [currentUser, ...users] : users;
 
@@ -60,26 +81,83 @@ export default function UserSettingPage() {
     setIsOpen(true);
   };
 
+  const openDeleteModal = (user) => {
+    setDeleteTarget(user);
+    setIsDeleteOpen(true);
+  };
+
   const confirmDelete = async () => {
-    setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
-    setIsDeleteOpen(false);
-    setDeleteTarget(null);
+    try {
+      setIsLoading(true);
+      const response = await fetch(`/api/users/${deleteTarget.id}`, {
+        method: "DELETE"
+      });
+
+      if (!response.ok) throw new Error("Failed to delete user");
+      setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
+      setIsDeleteOpen(false);
+      setDeleteTarget(null);
+      setError(null);
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      setError("Failed to delete user");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleAddUser = async () => {
     if (!email.trim()) return;
-    const newUser = { id: Date.now(), name: email.split("@")[0], email, role };
-    setUsers((prev) => [...prev, newUser]);
-    setIsOpen(false);
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: email.split("@")[0],
+          email,
+          role
+        })
+      });
+
+      if (!response.ok) throw new Error("Failed to add user");
+      const newUser = await response.json();
+      setUsers((prev) => [...prev, newUser]);
+      setIsOpen(false);
+      setError(null);
+    } catch (error) {
+      console.error("Error adding user:", error);
+      setError("Failed to add user");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleEditUser = async () => {
-    if (currentUser && editId === currentUser.id) {
-      setCurrentUser({ ...currentUser, email, role });
-    } else {
-      setUsers((prev) => prev.map((u) => u.id === editId ? { ...u, email, role } : u));
+    try {
+      setIsLoading(true);
+      const response = await fetch(`/api/users/${editId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, role })
+      });
+
+      if (!response.ok) throw new Error("Failed to update user");
+      const updatedUser = await response.json();
+
+      if (currentUser && editId === currentUser.id) {
+        setCurrentUser({ ...currentUser, email, role: updatedUser.role });
+      } else {
+        setUsers((prev) => prev.map((u) => u.id === editId ? { ...u, email, role: updatedUser.role } : u));
+      }
+      setIsOpen(false);
+      setError(null);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      setError("Failed to update user");
+    } finally {
+      setIsLoading(false);
     }
-    setIsOpen(false);
   };
 
   if (!isLoaded) return <div className="text-white text-center mt-20 animate-pulse font-bold tracking-widest uppercase text-xs">Syncing Workspace...</div>;
@@ -108,7 +186,7 @@ export default function UserSettingPage() {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
                 <input type="text" className="w-full bg-white/5 border border-white/5 focus:border-[#BE7EC7]/50 outline-none rounded-2xl py-2.5 pl-12 pr-4 text-white text-sm" placeholder="Search user..." />
               </div>
-              <button onClick={openAddModal} className="flex items-center gap-2 bg-[#BE7EC7] hover:bg-[#a66bb0] text-white px-5 py-2.5 rounded-2xl font-bold text-sm shadow-lg shadow-[#BE7EC7]/20 transition-all">
+              <button onClick={openAddModal} className="flex items-center gap-2 bg-[#BE7EC7] hover:bg-[#a66bb0] disabled:opacity-50 text-white px-5 py-2.5 rounded-2xl font-bold text-sm shadow-lg shadow-[#BE7EC7]/20 transition-all" disabled={isLoading}>
                 <Plus size={18} /> Add User
               </button>
             </div>
@@ -116,6 +194,13 @@ export default function UserSettingPage() {
         </div>
 
         <div className="h-px bg-white/5 mx-8"></div>
+
+        {error && (
+          <div className="mx-8 mt-6 p-4 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-500 text-sm flex items-center gap-3">
+            <AlertTriangle size={18} />
+            {error}
+          </div>
+        )}
 
         {/* User List Area */}
         <div className="flex-1 overflow-y-auto custom-scrollbar p-8 pt-6">
@@ -144,11 +229,11 @@ export default function UserSettingPage() {
 
                   <div className="flex items-center gap-2 opacity-40 group-hover:opacity-100 transition-opacity">
                     {!isMe && (
-                      <button onClick={() => openDeleteModal(user)} className="p-2.5 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all border border-red-500/10">
+                      <button onClick={() => openDeleteModal(user)} disabled={isLoading} className="p-2.5 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white disabled:opacity-50 transition-all border border-red-500/10">
                         <Ban size={16} />
                       </button>
                     )}
-                    <button onClick={() => openEditModal(user)} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 text-white/70 hover:bg-white/10 transition-all border border-white/10 font-bold text-xs uppercase tracking-widest">
+                    <button onClick={() => openEditModal(user)} disabled={isLoading} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 text-white/70 hover:bg-white/10 disabled:opacity-50 transition-all border border-white/10 font-bold text-xs uppercase tracking-widest">
                       <Edit size={14} /> Manage
                     </button>
                   </div>
@@ -169,8 +254,10 @@ export default function UserSettingPage() {
             <h2 className="text-white text-xl font-bold mb-2 tracking-tight">Remove User?</h2>
             <p className="text-white/40 text-sm mb-8 leading-relaxed">Are you sure you want to revoke access for <span className="text-white font-bold">"{deleteTarget?.name}"</span>?</p>
             <div className="flex gap-3">
-              <button onClick={() => setIsDeleteOpen(false)} className="flex-1 py-3 rounded-xl bg-white/5 text-white font-bold text-xs uppercase tracking-widest hover:bg-white/10">Cancel</button>
-              <button onClick={confirmDelete} className="flex-1 py-3 rounded-xl bg-red-500 text-white font-bold text-xs uppercase tracking-widest shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all">Remove</button>
+              <button onClick={() => setIsDeleteOpen(false)} disabled={isLoading} className="flex-1 py-3 rounded-xl bg-white/5 text-white font-bold text-xs uppercase tracking-widest hover:bg-white/10 disabled:opacity-50">Cancel</button>
+              <button onClick={confirmDelete} disabled={isLoading} className="flex-1 py-3 rounded-xl bg-red-500 text-white font-bold text-xs uppercase tracking-widest shadow-lg shadow-red-500/20 hover:bg-red-600 disabled:opacity-50 transition-all">
+                {isLoading ? "Removing..." : "Remove"}
+              </button>
             </div>
           </div>
         </div>
@@ -218,9 +305,9 @@ export default function UserSettingPage() {
             </div>
 
             <div className="flex gap-4 mt-10">
-              <button onClick={() => setIsOpen(false)} className="flex-1 py-3.5 rounded-2xl bg-white/5 text-white/50 font-bold text-xs uppercase tracking-widest hover:bg-white/10 border border-white/5 transition-all">Cancel</button>
-              <button onClick={mode === "add" ? handleAddUser : handleEditUser} className="flex-1 py-3.5 rounded-2xl bg-[#BE7EC7] text-white font-bold text-xs uppercase tracking-widest shadow-lg shadow-[#BE7EC7]/20 hover:bg-[#a66bb0] transition-all transform active:scale-95">
-                {mode === "add" ? "Add Member" : "Save Changes"}
+              <button onClick={() => setIsOpen(false)} disabled={isLoading} className="flex-1 py-3.5 rounded-2xl bg-white/5 text-white/50 font-bold text-xs uppercase tracking-widest hover:bg-white/10 disabled:opacity-50 border border-white/5 transition-all">Cancel</button>
+              <button onClick={mode === "add" ? handleAddUser : handleEditUser} disabled={isLoading} className="flex-1 py-3.5 rounded-2xl bg-[#BE7EC7] text-white font-bold text-xs uppercase tracking-widest shadow-lg shadow-[#BE7EC7]/20 hover:bg-[#a66bb0] disabled:opacity-50 transition-all transform active:scale-95">
+                {isLoading ? "Processing..." : (mode === "add" ? "Add Member" : "Save Changes")}
               </button>
             </div>
           </div>

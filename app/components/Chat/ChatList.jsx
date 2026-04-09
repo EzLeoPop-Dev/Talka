@@ -53,11 +53,10 @@ export default function ChatList({ chats = [], onSelectChat, selectedId, availab
                         <div
                             key={chat.id}
                             onClick={() => onSelectChat(chat)}
-                            className={`p-4 border-b border-white/5 cursor-pointer transition-all ${
-                                selectedId === chat.id
+                            className={`p-4 border-b border-white/5 cursor-pointer transition-all ${selectedId === chat.id
                                     ? "bg-[#BE7EC7]/10 border-l-4 border-l-[#BE7EC7]"
                                     : "hover:bg-white/5 border-l-4 border-l-transparent"
-                            }`}
+                                }`}
                         >
                             <div className="flex items-start gap-3">
                                 {/* Avatar */}
@@ -81,17 +80,39 @@ export default function ChatList({ chats = [], onSelectChat, selectedId, availab
                                         {chat.lastMessage || "No messages"}
                                     </p>
 
-                                    {/* Status Badge */}
-                                    <div className="flex gap-2 mt-2">
-                                        <span className={`text-[9px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-md border ${
-                                            chat.status === "OPEN"
+                                    {/* Status Badge & Tags */}
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                        <span className={`text-[9px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-md border shrink-0 ${chat.status === "OPEN"
                                                 ? "bg-green-500/10 text-green-400 border-green-500/20"
                                                 : chat.status === "PENDING"
-                                                ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
-                                                : "bg-white/5 text-white/50 border-white/10"
-                                        }`}>
+                                                    ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
+                                                    : "bg-white/5 text-white/50 border-white/10"
+                                            }`}>
                                             {chat.status}
                                         </span>
+
+                                        {/* วนลูปแสดง Tags */}
+                                        {chat.tags && chat.tags.map(tagName => {
+                                            // ค้นหาข้อมูล Tag จาก availableTags เพื่อดึงสีและ Emoji
+                                            const tagObj = availableTags.find(t => (typeof t === 'object' ? t.name : t) === tagName);
+                                            const tagColor = tagObj?.color || '#BE7EC7';
+                                            const tagEmoji = tagObj?.emoji || '';
+
+                                            return (
+                                                <span
+                                                    key={tagName}
+                                                    className="text-[9px] tracking-wider font-medium px-2 py-0.5 rounded-md border flex items-center gap-1 shrink-0"
+                                                    style={{
+                                                        backgroundColor: `${tagColor}15`, // เพิ่ม 15 เพื่อทำ Opacity แบบ Hex
+                                                        color: tagColor,
+                                                        borderColor: `${tagColor}30`
+                                                    }}
+                                                >
+                                                    {tagEmoji && <span>{tagEmoji}</span>}
+                                                    {tagName}
+                                                </span>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             </div>

@@ -1,11 +1,12 @@
 "use client";
-import { Info, X, Trash2, Edit, UsersRound, Search, Plus, Check, Settings2, Globe } from "lucide-react";
+import { Info, X, Trash2, Edit, UsersRound, Search, Plus, Check, Settings2, Globe, AlertTriangle } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 
 // Modal สำหรับสร้าง/แก้ไขทีม
 function TeamModal({
     isOpen, title, onClose, onConfirm, teamName, setTeamName, teamDesc, setTeamDesc,
-    teamMembers, setTeamMembers, userOptions, platforms, setPlatforms
+    teamMembers, setTeamMembers, userOptions, platforms, setPlatforms, isLoading
 }) {
     if (!isOpen) return null;
 
@@ -119,8 +120,8 @@ function TeamModal({
                 </div>
 
                 <div className="flex gap-4 mt-10">
-                    <button onClick={onClose} className="flex-1 py-3.5 rounded-2xl bg-white/5 text-white/50 font-bold text-xs uppercase tracking-widest hover:bg-white/10 transition-all border border-white/5">Cancel</button>
-                    <button onClick={onConfirm} className="flex-1 py-3.5 rounded-2xl bg-[#BE7EC7] text-white font-bold text-xs uppercase tracking-widest shadow-lg shadow-[#BE7EC7]/20 hover:bg-[#a66bb0] transition-all transform active:scale-95">Save Team</button>
+                    <button onClick={onClose} disabled={isLoading} className="flex-1 py-3.5 rounded-2xl bg-white/5 text-white/50 font-bold text-xs uppercase tracking-widest hover:bg-white/10 disabled:opacity-50 transition-all border border-white/5">Cancel</button>
+                    <button onClick={onConfirm} disabled={isLoading} className="flex-1 py-3.5 rounded-2xl bg-[#BE7EC7] text-white font-bold text-xs uppercase tracking-widest shadow-lg shadow-[#BE7EC7]/20 hover:bg-[#a66bb0] disabled:opacity-50 transition-all transform active:scale-95">{isLoading ? "Saving..." : "Save Team"}</button>
                 </div>
             </div>
         </div>
@@ -128,7 +129,7 @@ function TeamModal({
 }
 
 // Confirm Delete Modal
-function ConfirmDeleteModal({ isOpen, teamName, onClose, onConfirm }) {
+function ConfirmDeleteModal({ isOpen, teamName, onClose, onConfirm, isLoading }) {
     if (!isOpen) return null;
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex justify-center items-center z-[110] p-4">
@@ -139,8 +140,8 @@ function ConfirmDeleteModal({ isOpen, teamName, onClose, onConfirm }) {
                 <h2 className="text-white text-xl font-bold mb-2 tracking-tight">Delete Team?</h2>
                 <p className="text-white/40 text-sm mb-8">Are you sure you want to remove <span className="text-white font-bold">"{teamName}"</span>? This cannot be undone.</p>
                 <div className="flex gap-3">
-                    <button onClick={onClose} className="flex-1 py-3 rounded-xl bg-white/5 text-white font-bold text-xs uppercase tracking-widest hover:bg-white/10">Cancel</button>
-                    <button onClick={onConfirm} className="flex-1 py-3 rounded-xl bg-red-500 text-white font-bold text-xs uppercase tracking-widest shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all">Delete</button>
+                    <button onClick={onClose} disabled={isLoading} className="flex-1 py-3 rounded-xl bg-white/5 text-white font-bold text-xs uppercase tracking-widest hover:bg-white/10 disabled:opacity-50">Cancel</button>
+                    <button onClick={onConfirm} disabled={isLoading} className="flex-1 py-3 rounded-xl bg-red-500 text-white font-bold text-xs uppercase tracking-widest shadow-lg shadow-red-500/20 hover:bg-red-600 disabled:opacity-50 transition-all">{isLoading ? "Deleting..." : "Delete"}</button>
                 </div>
             </div>
         </div>
@@ -148,6 +149,8 @@ function ConfirmDeleteModal({ isOpen, teamName, onClose, onConfirm }) {
 }
 
 export default function TeamSettingPage() {
+    const { data: session } = useSession();
+    
     const [teams, setTeams] = useState([]);
     const [isLoaded, setIsLoaded] = useState(false);
     const [isAddOpen, setIsAddOpen] = useState(false);
@@ -160,20 +163,46 @@ export default function TeamSettingPage() {
     const [teamMembers, setTeamMembers] = useState([]);
     const [platforms, setPlatforms] = useState([]);
     const [userOptions, setUserOptions] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const mockMe = { id: 999, name: "My Name", role: 'Owner', isMe: true };
-                const mockOthers = [{ id: 1, name: "Employee A", role: "Manager", isMe: false }];
-                setUserOptions([mockMe, ...mockOthers]);
-                setIsLoaded(true);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        };
         fetchData();
     }, []);
+
+    const fetchData = async () => {
+        try {
+            setIsLoaded(false);
+            // ดึงรายชื่อ users
+            const usersResponse = await fetch("/api/users");
+            if (usersResponse.ok) {
+                const users = await usersResponse.json();
+                const currentUser = session?.user ? {
+                    id: session.user.id,
+                    name: session.user.name,
+                    role: session.user.role,
+                    isMe: true
+                } : null;
+                const otherUsers = users
+                    .filter(u => !currentUser || u.email !== session.user.email)
+                    .map(u => ({ id: u.id, name: u.name, role: u.role, isMe: false }));
+                setUserOptions(currentUser ? [currentUser, ...otherUsers] : otherUsers);
+            }
+            
+            // ดึงทีมทั้งหมด
+            const teamsResponse = await fetch("/api/teams");
+            if (teamsResponse.ok) {
+                const teamsData = await teamsResponse.json();
+                setTeams(teamsData);
+            }
+            setError(null);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            setError("Failed to load data");
+        } finally {
+            setIsLoaded(true);
+        }
+    };
 
     const resetForm = () => {
         setTeamName("");
@@ -183,18 +212,77 @@ export default function TeamSettingPage() {
     };
 
     const handleAddTeam = async () => {
-        if (!teamName.trim() || teamMembers.length === 0) return alert("Missing info");
-        const newTeam = { id: crypto.randomUUID(), name: teamName.trim(), desc: teamDesc.trim(), members: teamMembers, platforms: platforms };
-        setTeams((prev) => [...prev, newTeam]);
-        setIsAddOpen(false);
-        resetForm();
+        if (!teamName.trim() || teamMembers.length === 0) return setError("Please fill in team name and select members");
+        try {
+            setIsLoading(true);
+            const response = await fetch("/api/teams", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: teamName.trim(),
+                    desc: teamDesc.trim(),
+                    members: teamMembers,
+                    platforms: platforms
+                })
+            });
+            if (!response.ok) throw new Error("Failed to create team");
+            const newTeam = await response.json();
+            setTeams((prev) => [...prev, newTeam]);
+            setIsAddOpen(false);
+            resetForm();
+            setError(null);
+        } catch (error) {
+            console.error("Error creating team:", error);
+            setError("Failed to create team");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleSaveEdit = async () => {
-        setTeams((prev) => prev.map((t) => (t.id === editTeam.id ? { ...t, name: teamName, desc: teamDesc, members: teamMembers, platforms: platforms } : t)));
-        setIsEditOpen(false);
-        setEditTeam(null);
-        resetForm();
+        try {
+            setIsLoading(true);
+            const response = await fetch(`/api/teams/${editTeam.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: teamName,
+                    desc: teamDesc,
+                    members: teamMembers,
+                    platforms: platforms
+                })
+            });
+            if (!response.ok) throw new Error("Failed to update team");
+            const updatedTeam = await response.json();
+            setTeams((prev) => prev.map((t) => (t.id === editTeam.id ? updatedTeam : t)));
+            setIsEditOpen(false);
+            setEditTeam(null);
+            resetForm();
+            setError(null);
+        } catch (error) {
+            console.error("Error updating team:", error);
+            setError("Failed to update team");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleDeleteTeam = async (team) => {
+        try {
+            setIsLoading(true);
+            const response = await fetch(`/api/teams/${team.id}`, {
+                method: "DELETE"
+            });
+            if (!response.ok) throw new Error("Failed to delete team");
+            setTeams(prev => prev.filter(t => t.id !== team.id));
+            setIsDeleteOpen(false);
+            setError(null);
+        } catch (error) {
+            console.error("Error deleting team:", error);
+            setError("Failed to delete team");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleOpenEdit = (team) => {
@@ -227,7 +315,7 @@ export default function TeamSettingPage() {
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
                                 <input type="text" className="w-full bg-white/5 border border-white/5 focus:border-[#BE7EC7]/50 outline-none rounded-2xl py-2.5 pl-12 pr-4 text-white text-sm" placeholder="Search team..." />
                             </div>
-                            <button onClick={() => { resetForm(); setIsAddOpen(true); }} className="flex items-center gap-2 bg-[#BE7EC7] hover:bg-[#a66bb0] text-white px-5 py-2.5 rounded-2xl font-bold text-sm shadow-lg shadow-[#BE7EC7]/20 transition-all">
+                            <button onClick={() => { resetForm(); setIsAddOpen(true); }} disabled={isLoading} className="flex items-center gap-2 bg-[#BE7EC7] hover:bg-[#a66bb0] disabled:opacity-50 text-white px-5 py-2.5 rounded-2xl font-bold text-sm shadow-lg shadow-[#BE7EC7]/20 transition-all">
                                 <Plus size={18} /> Add Team
                             </button>
                         </div>
@@ -235,6 +323,13 @@ export default function TeamSettingPage() {
                 </div>
 
                 <div className="h-px bg-white/5 mx-8"></div>
+
+                {error && (
+                    <div className="mx-8 mt-6 p-4 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-500 text-sm flex items-center gap-3">
+                        <AlertTriangle size={18} />
+                        {error}
+                    </div>
+                )}
 
                 {/* Teams List Area */}
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-8">
@@ -280,10 +375,10 @@ export default function TeamSettingPage() {
                                         </div>
 
                                         <div className="flex gap-2 shrink-0">
-                                            <button onClick={() => { setDeleteTeam(team); setIsDeleteOpen(true); }} className="w-10 h-10 flex items-center justify-center rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all border border-red-500/10">
+                                            <button onClick={() => { setDeleteTeam(team); setIsDeleteOpen(true); }} disabled={isLoading} className="w-10 h-10 flex items-center justify-center rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white disabled:opacity-50 transition-all border border-red-500/10">
                                                 <Trash2 size={16} />
                                             </button>
-                                            <button onClick={() => handleOpenEdit(team)} className="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 px-4 h-10 rounded-xl transition-all font-bold text-xs uppercase tracking-widest">
+                                            <button onClick={() => handleOpenEdit(team)} disabled={isLoading} className="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 px-4 h-10 rounded-xl disabled:opacity-50 transition-all font-bold text-xs uppercase tracking-widest">
                                                 <Edit size={14} /> Manage
                                             </button>
                                         </div>
@@ -300,16 +395,19 @@ export default function TeamSettingPage() {
                 isOpen={isAddOpen} title="Add New Team" onClose={() => setIsAddOpen(false)} onConfirm={handleAddTeam}
                 teamName={teamName} setTeamName={setTeamName} teamDesc={teamDesc} setTeamDesc={setTeamDesc}
                 teamMembers={teamMembers} setTeamMembers={setTeamMembers} userOptions={userOptions} platforms={platforms} setPlatforms={setPlatforms}
+                isLoading={isLoading}
             />
 
             <TeamModal
                 isOpen={isEditOpen} title="Update Team" onClose={() => setIsEditOpen(false)} onConfirm={handleSaveEdit}
                 teamName={teamName} setTeamName={setTeamName} teamDesc={teamDesc} setTeamDesc={setTeamDesc}
                 teamMembers={teamMembers} setTeamMembers={setTeamMembers} userOptions={userOptions} platforms={platforms} setPlatforms={setPlatforms}
+                isLoading={isLoading}
             />
 
             <ConfirmDeleteModal
-                isOpen={isDeleteOpen} teamName={deleteTeam?.name} onClose={() => setIsDeleteOpen(false)} onConfirm={() => { setTeams(prev => prev.filter(t => t.id !== deleteTeam.id)); setIsDeleteOpen(false); }}
+                isOpen={isDeleteOpen} teamName={deleteTeam?.name} onClose={() => setIsDeleteOpen(false)} onConfirm={() => handleDeleteTeam(deleteTeam)}
+                isLoading={isLoading}
             />
         </div>
     );

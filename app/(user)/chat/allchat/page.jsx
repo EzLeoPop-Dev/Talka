@@ -36,7 +36,7 @@ function ChatPageContent() {
     const [chats, setChats] = useState([]);
     const [selectedChatId, setSelectedChatId] = useState(null);
     const selectedChat = chats.find(chat => chat.id === selectedChatId);
-    
+
     const [isLoaded, setIsLoaded] = useState(false);
 
     // State สำหรับ UI Modals
@@ -50,7 +50,7 @@ function ChatPageContent() {
 
     const [activeFilter, setActiveFilter] = useState("All");
     const [activeCompanyFilter, setActiveCompanyFilter] = useState(null);
-    
+
     const [currentUser, setCurrentUser] = useState({ name: "Admin", role: "Admin", avatar: "A" });
 
     const [activityLogs, setActivityLogs] = useState([]);
@@ -59,16 +59,27 @@ function ChatPageContent() {
     const [availableTags, setAvailableTags] = useState(DEFAULT_TAGS);
 
     // 🟢 Fetch Initial Data from API
+    // 🟢 Fetch Initial Data from API
     useEffect(() => {
         const loadData = async () => {
             try {
-                const res = await fetch('/api/line/chat-sessions');
-                if (!res.ok) throw new Error('API Error');
-                const data = await res.json();
-                setChats(Array.isArray(data) ? data : []);
+                // 1. ดึงข้อมูล Chat
+                const chatRes = await fetch('/api/line/chat-sessions');
+                if (chatRes.ok) {
+                    const chatData = await chatRes.json();
+                    setChats(Array.isArray(chatData) ? chatData : []);
+                }
+
+                // 2. ดึงข้อมูล Tags ทั้งหมดจาก DB
+                const tagRes = await fetch('/api/tags');
+                if (tagRes.ok) {
+                    const tagData = await tagRes.json();
+                    // อัปเดต availableTags ด้วยข้อมูลจาก Database
+                    setAvailableTags(tagData);
+                }
+
             } catch (error) {
-                console.error('❌ Failed to load chats:', error);
-                // Fallback: ใช้ข้อมูลว่างๆ เพื่อให้ UI แสดงได้
+                console.error('❌ Failed to load data:', error);
                 setChats([]);
             } finally {
                 setIsLoaded(true);
@@ -89,7 +100,7 @@ function ChatPageContent() {
                 eventSource.addEventListener('message', (event) => {
                     try {
                         const data = JSON.parse(event.data);
-                        
+
                         setChats(prev => {
                             const isExistingChat = prev.some(chat => chat.id === data.chatId);
 
@@ -113,7 +124,7 @@ function ChatPageContent() {
                             } else {
                                 const newChat = {
                                     id: data.chatId,
-                                    name: data.customerName || "LINE User", 
+                                    name: data.customerName || "LINE User",
                                     platform: "LINE",
                                     status: "OPEN",
                                     messages: [{
@@ -179,19 +190,85 @@ function ChatPageContent() {
         setActivityLogs(prev => [...prev, newLog]);
     };
 
+    // แก้ไขฟังก์ชัน handleToggleTag ในหน้า page.jsx
     const handleToggleTag = async (tagName) => {
         if (!selectedChat) return;
-        addLog(selectedChat.id, 'tag', `Changed tag to "${tagName}"`);
+
+        // 1. อัปเดต UI ทันทีก่อนรอ API (Optimistic Update) ให้ผู้ใช้รู้สึกว่าระบบเร็ว
+        setChats(currentChats => currentChats.map(chat => {
+            if (chat.id === selectedChat.id) {
+                const currentTags = chat.tags || [];
+                const hasTag = currentTags.includes(tagName);
+
+                // สลับสถานะ: ถ้ามีอยู่แล้วให้เอาออก ถ้าไม่มีให้เพิ่มเข้าไป
+                const newTags = hasTag
+                    ? currentTags.filter(t => t !== tagName)
+                    : [...currentTags, tagName];
+
+                return { ...chat, tags: newTags };
+            }
+            return chat;
+        }));
+
+        // 2. เรียก API ไปยัง Backend เพื่อบันทึกลง Database
+        try {
+            const res = await fetch(`/api/chat-sessions/${selectedChat.id}/tags`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tagName })
+            });
+
+            if (!res.ok) throw new Error("Failed to update tag");
+
+            const result = await res.json();
+
+            // 3. บันทึก Activity Log ตามผลลัพธ์ที่ได้จาก API
+            const actionText = result.action === 'added' ? 'Added' : 'Removed';
+            addLog(selectedChat.id, 'tag', `${actionText} tag "${tagName}"`);
+
+        } catch (error) {
+            console.error('❌ Error toggling tag:', error);
+            // หมายเหตุ: ในระบบ Production คุณอาจจะใส่ Logic เพื่อ Revert state กลับหากยิง API ไม่สำเร็จ
+        }
     };
 
     const handleUpdateStatus = async (newStatus) => {
         if (!selectedChat) return;
-        addLog(selectedChat.id, 'status', `Changed status from "${selectedChat.status}" to "${newStatus}"`);
+
+        const previousStatus = selectedChat.status;
+
+        // 1. อัปเดต UI ทันทีก่อนรอ API (Optimistic Update)
         setChats(currentChats =>
             currentChats.map(chat =>
                 chat.id === selectedChat.id ? { ...chat, status: newStatus } : chat
             )
         );
+
+        // 2. เรียก API ไปยัง Backend เพื่อบันทึกลง Database
+        try {
+            // แนะนำให้สร้าง API route ตาม Path นี้นะครับ
+            const res = await fetch(`/api/chat-sessions/${selectedChat.id}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            });
+
+            if (!res.ok) throw new Error("Failed to update status");
+
+            // 3. บันทึก Activity Log เมื่อสำเร็จ
+            addLog(selectedChat.id, 'status', `Changed status from "${previousStatus}" to "${newStatus}"`);
+
+        } catch (error) {
+            console.error('❌ Error updating status:', error);
+            alert("ไม่สามารถอัปเดตสถานะได้ ระบบจะย้อนกลับค่าเดิม");
+
+            // Revert state กลับหากยิง API ไม่สำเร็จ
+            setChats(currentChats =>
+                currentChats.map(chat =>
+                    chat.id === selectedChat.id ? { ...chat, status: previousStatus } : chat
+                )
+            );
+        }
     };
 
     const handleUpdateContactInfo = async (contactId, updatedInfo) => {
@@ -294,40 +371,40 @@ function ChatPageContent() {
 
     return (
         <div className="flex-1 flex flex-col h-full max-h-full overflow-hidden bg-transparent">
-            
+
             <div className="flex-shrink-0 px-7 py-4 border-b border-white/5">
-                <ChatFitter 
-                    onFilterChange={setActiveFilter} 
-                    availableCompanies={availableCompanies} 
-                    onCompanyChange={setActiveCompanyFilter} 
+                <ChatFitter
+                    onFilterChange={setActiveFilter}
+                    availableCompanies={availableCompanies}
+                    onCompanyChange={setActiveCompanyFilter}
                 />
             </div>
 
             {/* Main Chat Area */}
             <div className="flex-1 flex gap-5 px-7 py-3 overflow-hidden">
-                
+
                 {/* 1. Chat List (ซ้าย) */}
-                <ChatList 
-                    chats={filteredChats} 
-                    onSelectChat={(chat) => setSelectedChatId(chat.id)} 
-                    selectedId={selectedChatId} 
-                    availableTags={availableTags} 
+                <ChatList
+                    chats={filteredChats}
+                    onSelectChat={(chat) => setSelectedChatId(chat.id)}
+                    selectedId={selectedChatId}
+                    availableTags={availableTags}
                 />
 
                 {/* 2. Chat Message & Panels (ขวา) */}
                 <div className="flex-1 flex gap-5 overflow-hidden relative">
-                    <ChatMessage 
-                        chat={selectedChat} 
-                        availableAgents={availableAgents} 
+                    <ChatMessage
+                        chat={selectedChat}
+                        availableAgents={availableAgents}
                         onSelectAiAgent={(id, agent) => {
                             setChats(prev => prev.map(c => c.id === id ? { ...c, activeAiAgent: agent, isAiMode: !!agent } : c));
-                        }} 
-                        aiPrompts={activePrompts} 
-                        currentUser={currentUser} 
-                        onSendMessage={handleSendMessage} 
-                        availableTags={availableTags} 
+                        }}
+                        aiPrompts={activePrompts}
+                        currentUser={currentUser}
+                        onSendMessage={handleSendMessage}
+                        availableTags={availableTags}
                     />
-                    
+
                     {/* Right Side Panels */}
                     {isAddTagModalOpen && <AddTag onClose={() => setIsAddTagModalOpen(false)} availableTags={availableTags} currentTargets={selectedChat?.tags || []} onToggleTag={handleToggleTag} />}
                     {isContactDetailsOpen && <ContactDetails onClose={() => setIsContactDetailsOpen(false)} contact={selectedChat} onUpdateContact={handleUpdateContactInfo} />}
@@ -336,9 +413,9 @@ function ChatPageContent() {
                     }} />}
                     {isChangeStatusOpen && <ChangeStatus onClose={() => setIsChangeStatusOpen(false)} availableStatus={ALL_AVAILABLE_STATUS} currentTargets={selectedChat?.status ? [selectedChat.status] : []} onToggleStatus={handleUpdateStatus} />}
                     {isActivityLogOpen && <ActivityLogPanel onClose={() => setIsActivityLogOpen(false)} logs={activityLogs.filter(log => log.chatId === selectedChatId)} />}
-                    
+
                     {selectedChatId && (
-                        <ControlPanel 
+                        <ControlPanel
                             onOpenAddTagModal={() => { closeAllPanels(); setIsAddTagModalOpen(true); }}
                             onOpenContactDetails={() => { closeAllPanels(); setIsContactDetailsOpen(true); }}
                             onOpenAddNote={() => { closeAllPanels(); setIsAddNoteOpen(true); }}
@@ -347,7 +424,7 @@ function ChatPageContent() {
                             onOpenSendToBoard={() => { closeAllPanels(); setIsSendToBoardOpen(true); }}
                         />
                     )}
-                    
+
                     {/* AI Button ลอยอยู่มุมขวาล่าง */}
                     <div className="absolute bottom-6 right-6 z-50">
                         <AiSuppBtn onClick={() => setIsAiAssistantOpen(!isAiAssistantOpen)} isOpen={isAiAssistantOpen} />

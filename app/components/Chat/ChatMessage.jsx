@@ -153,9 +153,35 @@ export default function ChatMessage({ chat, availableAgents, onSelectAiAgent, ai
 
                     <div className="min-w-0 flex-1">
                         <h2 className="text-white font-semibold text-lg truncate leading-tight mb-1">{chat?.name}</h2>
-                        <span className="text-[10px] text-[#BE7EC7] uppercase tracking-wider font-semibold px-2 py-0.5 rounded border border-[#BE7EC7]/20 bg-[#BE7EC7]/10">
-                            {chat?.status}
-                        </span>
+
+                        <div className="flex flex-wrap items-center gap-2">
+                            {/* Status Badge */}
+                            <span className="text-[10px] text-[#BE7EC7] uppercase tracking-wider font-semibold px-2 py-0.5 rounded border border-[#BE7EC7]/20 bg-[#BE7EC7]/10 shrink-0">
+                                {chat?.status}
+                            </span>
+
+                            {/* Tags Badge */}
+                            {chat?.tags && chat.tags.map(tagName => {
+                                const tagObj = availableTags.find(t => (typeof t === 'object' ? t.name : t) === tagName);
+                                const tagColor = tagObj?.color || '#BE7EC7';
+                                const tagEmoji = tagObj?.emoji || '';
+
+                                return (
+                                    <span
+                                        key={tagName}
+                                        className="text-[10px] tracking-wider font-semibold px-2 py-0.5 rounded border flex items-center gap-1 shrink-0"
+                                        style={{
+                                            backgroundColor: `${tagColor}15`,
+                                            color: tagColor,
+                                            borderColor: `${tagColor}30`
+                                        }}
+                                    >
+                                        {tagEmoji && <span>{tagEmoji}</span>}
+                                        {tagName}
+                                    </span>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -170,11 +196,10 @@ export default function ChatMessage({ chat, availableAgents, onSelectAiAgent, ai
                                 <span className="text-[10px] text-white/30 mb-1 px-1">
                                     {msg.time}
                                 </span>
-                                <div className={`px-4 py-2.5 rounded-2xl max-w-[70%] text-sm wrap-break-words shadow-sm ${
-                                    isMe 
-                                        ? 'bg-[#BE7EC7] text-white rounded-br-sm' 
+                                <div className={`px-4 py-2.5 rounded-2xl max-w-[70%] text-sm wrap-break-words shadow-sm ${isMe
+                                        ? 'bg-[#BE7EC7] text-white rounded-br-sm'
                                         : 'bg-white/5 border border-white/10 text-white/90 rounded-bl-sm'
-                                }`}>
+                                    }`}>
                                     {msg.text}
                                 </div>
                             </div>
@@ -190,7 +215,7 @@ export default function ChatMessage({ chat, availableAgents, onSelectAiAgent, ai
 
             {/* Input Area */}
             <div className="relative shrink-0 border-t border-white/5 pt-4">
-                
+
                 {/* Emoji Picker Popup */}
                 {showEmojiPicker && (
                     <div className="absolute bottom-full right-0 mb-2 z-50">
@@ -232,7 +257,7 @@ export default function ChatMessage({ chat, availableAgents, onSelectAiAgent, ai
                     />
 
                     {/* Attach Button */}
-                    <button 
+                    <button
                         onClick={handleAttachClick}
                         data-tooltip-id="attach-tooltip"
                         data-tooltip-content="Attach file"
@@ -242,7 +267,7 @@ export default function ChatMessage({ chat, availableAgents, onSelectAiAgent, ai
                     </button>
 
                     {/* Emoji Button */}
-                    <button 
+                    <button
                         onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                         className={`w-10 h-10 flex items-center justify-center shrink-0 rounded-xl transition-all border ${showEmojiPicker ? 'bg-[#BE7EC7]/20 text-[#BE7EC7] border-[#BE7EC7]/50' : 'bg-white/5 hover:bg-white/10 text-white/50 hover:text-[#BE7EC7] border-white/5 hover:border-[#BE7EC7]/30'}`}
                     >
@@ -250,7 +275,7 @@ export default function ChatMessage({ chat, availableAgents, onSelectAiAgent, ai
                     </button>
 
                     {/* Send Button */}
-                    <button 
+                    <button
                         onClick={handleSendClick}
                         className="flex-1 px-4 py-2.5 bg-[#BE7EC7] hover:bg-[#a66bb0] text-white rounded-xl transition-all font-semibold flex items-center justify-center gap-2 shadow-lg shadow-[#BE7EC7]/20"
                     >

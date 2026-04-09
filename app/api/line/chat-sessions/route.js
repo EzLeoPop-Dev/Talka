@@ -119,7 +119,12 @@ export async function GET(req) {
                     orderBy: { created_at: "asc" },
                     take: 50, // จำกัด 50 ข้อความล่าสุด
                 },
-                tags: true,
+                // 🟢 1. แก้ไขตรงนี้ เพื่อให้ดึงข้อมูลจากตาราง Tag (ชื่อ, สี) ออกมาด้วย ไม่ใช่แค่ id
+                tags: {
+                    include: {
+                        tag: true 
+                    }
+                },
                 assigned_user: {
                     select: {
                         user_id: true,
@@ -142,9 +147,15 @@ export async function GET(req) {
             phone: chat.customer.phone,
             company: chat.customer.company,
             country: chat.customer.country,
-            status: chat.status, // OPEN, PENDING, CLOSED, RESOLVED
+            status: chat.status, 
             platform: chat.platform.platform_name,
-            tags: chat.tags.map(t => t.tag_id),
+            
+            // 🟢 2. แก้ไขตรงนี้ ให้ส่งกลับเป็น "ชื่อ Tag" แทนที่จะเป็น ID เพื่อให้หน้าบ้านใช้เปรียบเทียบได้ง่าย
+            tags: chat.tags.map(ct => {
+                const match = ct.tag.tag_name.match(/^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)\s*(.*)/u);
+                return match ? match[2] : ct.tag.tag_name;
+            }), 
+
             messages: chat.messages.map(m => ({
                 id: m.message_id,
                 from: m.sender_type === "CUSTOMER" ? "customer" : "me",

@@ -1,11 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Edit, Trash2, Plus, X, Tag, Sparkles, Hash, Info } from "lucide-react";
+import { Edit, Trash2, Plus, X, Tag, Sparkles, Hash, Info, AlertTriangle } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
-
-const DEFAULT_TAGS = [
-  { id: 'vip', name: 'VIP Customer', color: '#EAB308', emoji: '👑', description: 'High priority customers with recurring orders.' },
-];
 
 export default function TagsPage() {
   const [tags, setTags] = useState([]);
@@ -16,39 +12,91 @@ export default function TagsPage() {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [deleteTag, setDeleteTag] = useState(null);
   const [newTag, setNewTag] = useState({ name: "", color: "#BE7EC7", description: "", emoji: "🏷️" });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const colors = ["#FF4D4D", "#FF8C00", "#FFD700", "#4ade80", "#60a5fa", "#BE7EC7", "#BA55D3", "#FF69B4"];
 
   useEffect(() => {
-    const fetchTags = async () => {
-      try {
-        setTags(DEFAULT_TAGS);
-      } catch (error) {
-        console.error("Failed to fetch tags", error);
-      } finally {
-        setIsLoaded(true);
-      }
-    };
     fetchTags();
   }, []);
 
+  const fetchTags = async () => {
+    try {
+      setIsLoaded(false);
+      const response = await fetch("/api/tags");
+      if (!response.ok) throw new Error("Failed to fetch tags");
+      const tagsData = await response.json();
+      setTags(tagsData);
+      setError(null);
+    } catch (error) {
+      console.error("Failed to fetch tags", error);
+      setError("Failed to load tags");
+    } finally {
+      setIsLoaded(true);
+    }
+  };
+
   const handleCreateTag = async () => {
     if (!newTag.name) return;
-    const createdTag = { ...newTag, id: Date.now() };
-    setTags([...tags, createdTag]);
-    setNewTag({ name: "", color: "#BE7EC7", description: "", emoji: "🏷️" });
-    setIsModalOpen(false);
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/tags", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newTag)
+      });
+      if (!response.ok) throw new Error("Failed to create tag");
+      const createdTag = await response.json();
+      setTags([...tags, createdTag]);
+      setNewTag({ name: "", color: "#BE7EC7", description: "", emoji: "🏷️" });
+      setIsModalOpen(false);
+      setError(null);
+    } catch (error) {
+      console.error("Error creating tag:", error);
+      setError("Failed to create tag");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const confirmDeleteTag = async () => {
-    setTags(tags.filter((t) => t.id !== deleteTag.id));
-    setDeleteTag(null);
+    try {
+      setIsLoading(true);
+      const response = await fetch(`/api/tags/${deleteTag.id}`, {
+        method: "DELETE"
+      });
+      if (!response.ok) throw new Error("Failed to delete tag");
+      setTags(tags.filter((t) => t.id !== deleteTag.id));
+      setDeleteTag(null);
+      setError(null);
+    } catch (error) {
+      console.error("Error deleting tag:", error);
+      setError("Failed to delete tag");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleEditColor = async (id, color) => {
-    setTags(tags.map((tag) => (tag.id === id ? { ...tag, color } : tag)));
-    setIsEditModalOpen(false);
-    setEditTag(null);
+    try {
+      setIsLoading(true);
+      const response = await fetch(`/api/tags/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ color })
+      });
+      if (!response.ok) throw new Error("Failed to update tag");
+      setTags(tags.map((tag) => (tag.id === id ? { ...tag, color } : tag)));
+      setIsEditModalOpen(false);
+      setEditTag(null);
+      setError(null);
+    } catch (error) {
+      console.error("Error updating tag:", error);
+      setError("Failed to update tag");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const inputClass = "w-full bg-white/[0.03] border border-white/10 focus:border-[#BE7EC7]/50 focus:bg-white/[0.08] outline-none rounded-xl py-2.5 px-4 text-white text-sm transition-all";
@@ -72,7 +120,8 @@ export default function TagsPage() {
             </div>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 bg-[#BE7EC7] hover:bg-[#a66bb0] text-white px-5 py-2.5 rounded-2xl transition-all font-bold text-sm shadow-lg shadow-[#BE7EC7]/20"
+              disabled={isLoading}
+              className="flex items-center gap-2 bg-[#BE7EC7] hover:bg-[#a66bb0] disabled:opacity-50 text-white px-5 py-2.5 rounded-2xl transition-all font-bold text-sm shadow-lg shadow-[#BE7EC7]/20"
             >
               <Plus size={18} /> Create New Tag
             </button>
@@ -80,6 +129,13 @@ export default function TagsPage() {
         </div>
 
         <div className="h-px bg-white/5 mx-8"></div>
+
+        {error && (
+          <div className="mx-8 mt-6 p-4 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-500 text-sm flex items-center gap-3">
+            <AlertTriangle size={18} />
+            {error}
+          </div>
+        )}
 
         {/* Tags Display Area */}
         <div className="flex-1 overflow-y-auto custom-scrollbar p-8">
@@ -114,8 +170,8 @@ export default function TagsPage() {
                       </div>
                     </div>
                     <div className="flex gap-1">
-                      <button onClick={() => { setEditTag(tag); setIsEditModalOpen(true); }} className="p-2 text-white/20 hover:text-white hover:bg-white/5 rounded-lg transition-all"><Edit size={16} /></button>
-                      <button onClick={() => setDeleteTag(tag)} className="p-2 text-white/20 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"><Trash2 size={16} /></button>
+                      <button onClick={() => { setEditTag(tag); setIsEditModalOpen(true); }} disabled={isLoading} className="p-2 text-white/20 hover:text-white hover:bg-white/5 disabled:opacity-50 rounded-lg transition-all"><Edit size={16} /></button>
+                      <button onClick={() => setDeleteTag(tag)} disabled={isLoading} className="p-2 text-white/20 hover:text-red-400 hover:bg-red-500/10 disabled:opacity-50 rounded-lg transition-all"><Trash2 size={16} /></button>
                     </div>
                   </div>
                   <p className="text-white/40 text-xs leading-relaxed font-medium line-clamp-2">{tag.description || "No description provided for this tag."}</p>
@@ -136,8 +192,8 @@ export default function TagsPage() {
             <h2 className="text-white text-xl font-bold mb-2">Delete Tag?</h2>
             <p className="text-white/40 text-sm mb-8">Are you sure you want to remove <span className="text-white font-bold">"{deleteTag.name}"</span>? This cannot be undone.</p>
             <div className="flex gap-3">
-              <button onClick={() => setDeleteTag(null)} className="flex-1 py-3 rounded-xl bg-white/5 text-white font-bold text-xs uppercase tracking-widest hover:bg-white/10 transition-all">Cancel</button>
-              <button onClick={confirmDeleteTag} className="flex-1 py-3 rounded-xl bg-red-500 text-white font-bold text-xs uppercase tracking-widest shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all">Delete</button>
+              <button onClick={() => setDeleteTag(null)} disabled={isLoading} className="flex-1 py-3 rounded-xl bg-white/5 text-white font-bold text-xs uppercase tracking-widest hover:bg-white/10 disabled:opacity-50 transition-all">Cancel</button>
+              <button onClick={confirmDeleteTag} disabled={isLoading} className="flex-1 py-3 rounded-xl bg-red-500 text-white font-bold text-xs uppercase tracking-widest shadow-lg shadow-red-500/20 hover:bg-red-600 disabled:opacity-50 transition-all">{isLoading ? "Deleting..." : "Delete"}</button>
             </div>
           </div>
         </div>
@@ -189,8 +245,8 @@ export default function TagsPage() {
               </div>
 
               <div className="flex gap-3 pt-4">
-                <button onClick={() => setIsModalOpen(false)} className="flex-1 py-3.5 rounded-2xl bg-white/5 text-white/50 font-bold text-xs uppercase tracking-widest hover:bg-white/10 transition-all">Cancel</button>
-                <button onClick={handleCreateTag} className="flex-1 py-3.5 rounded-2xl bg-[#BE7EC7] text-white font-bold text-xs uppercase tracking-widest shadow-lg shadow-[#BE7EC7]/20 hover:bg-[#a66bb0] transition-all transform active:scale-95">Save Tag</button>
+                <button onClick={() => setIsModalOpen(false)} disabled={isLoading} className="flex-1 py-3.5 rounded-2xl bg-white/5 text-white/50 font-bold text-xs uppercase tracking-widest hover:bg-white/10 disabled:opacity-50 transition-all">Cancel</button>
+                <button onClick={handleCreateTag} disabled={isLoading} className="flex-1 py-3.5 rounded-2xl bg-[#BE7EC7] text-white font-bold text-xs uppercase tracking-widest shadow-lg shadow-[#BE7EC7]/20 hover:bg-[#a66bb0] disabled:opacity-50 transition-all transform active:scale-95">{isLoading ? "Saving..." : "Save Tag"}</button>
               </div>
             </div>
           </div>
@@ -217,7 +273,7 @@ export default function TagsPage() {
             <label className={labelClass}>Pick New Color</label>
             <div className="grid grid-cols-4 gap-3 mt-3">
               {colors.map((c) => (
-                <button key={c} onClick={() => handleEditColor(editTag.id, c)} className={`w-full aspect-square rounded-xl transition-all border-2 ${editTag.color === c ? "border-white scale-105" : "border-transparent opacity-50 hover:opacity-100"}`} style={{ backgroundColor: c }}></button>
+                <button key={c} onClick={() => handleEditColor(editTag.id, c)} disabled={isLoading} className={`w-full aspect-square rounded-xl transition-all border-2 disabled:opacity-50 ${editTag.color === c ? "border-white scale-105" : "border-transparent opacity-50 hover:opacity-100"}`} style={{ backgroundColor: c }}></button>
               ))}
             </div>
           </div>
