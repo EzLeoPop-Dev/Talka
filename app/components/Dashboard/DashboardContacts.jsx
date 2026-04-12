@@ -10,13 +10,12 @@ export default function DashboardContacts() {
     const fetchContacts = async () => {
       try {
         setIsLoading(true);
-        const mockData = [
-          { id: 1, name: "Alice Johnson", channel: "Facebook", status: "Open", tags: ["VIP"], imgUrl: "https://ui-avatars.com/api/?name=Alice+J&background=BE7EC7&color=fff" },
-          { id: 2, name: "Bob Smith", channel: "Line", status: "Pending", tags: [], imgUrl: "https://ui-avatars.com/api/?name=Bob+S&background=4ade80&color=fff" },
-          { id: 3, name: "Charlie Brown", channel: "Facebook", status: "New Chat", tags: ["Hot Lead"], imgUrl: "https://ui-avatars.com/api/?name=Charlie+B&background=60a5fa&color=fff" },
-          { id: 4, name: "David Miller", channel: "Line", status: "Open", tags: ["Support"], imgUrl: "https://ui-avatars.com/api/?name=David+M&background=fb7185&color=fff" }
-        ];
-        setTimeout(() => { setContacts(mockData); setIsLoading(false); }, 600);
+        const res = await fetch('/api/dashboard/contacts');
+        if (res.ok) {
+           const data = await res.json();
+           setContacts(data);
+        }
+        setIsLoading(false);
       } catch (error) { setIsLoading(false); }
     };
     fetchContacts();

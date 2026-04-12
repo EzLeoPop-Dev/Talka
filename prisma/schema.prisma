@@ -241,3 +241,22 @@ enum AssignmentStatus {
   IN_PROGRESS
   DONE
 }
+
+model WorkspaceSetting {
+  id             Int      @id @default(autoincrement())
+  workspaceName  String   @default("My Workspace")
+  timeoutMinutes Int      @default(30)
+  timeZone       String   @default("(GMT+07:00) Asia/Bangkok")
+  logoUrl        String?  @db.LongText
+  updatedAt      DateTime @updatedAt
+}
+
+model AIPrompt {
+  id        Int      @id @default(autoincrement())
+  name      String
+  action    String?  @db.Text
+  active    Boolean  @default(true)
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

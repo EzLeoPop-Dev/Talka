@@ -37,6 +37,7 @@ export default function Sidebar() {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [isOpenWorkspace, setIsOpenWorkspace] = useState(false);
   const [selectedWorkspace, setSelectedWorkspace] = useState("Work Space");
+  const [workspaceLogo, setWorkspaceLogo] = useState("/images/LogoSidebar.png");
   const workspaces = ["Work Space", "Development", "Marketing", "Support Team"];
 
   // User 
@@ -130,6 +131,18 @@ export default function Sidebar() {
     };
 
     syncProfile(false);
+
+    const fetchWorkspaceSettings = async () => {
+      try {
+        const res = await fetch("/api/generalinfo");
+        if (res.ok) {
+           const data = await res.json();
+           if (data.workspaceName) setSelectedWorkspace(data.workspaceName);
+           if (data.logoUrl) setWorkspaceLogo(data.logoUrl);
+        }
+      } catch (e) {}
+    };
+    fetchWorkspaceSettings();
 
     const handleUpdate = () => {
       syncProfile(true);
@@ -522,15 +535,13 @@ export default function Sidebar() {
 
           {/* Logo */}
           <div className="flex items-center justify-center gap-2 opacity-50 hover:opacity-100 py-2 border-t border-white/5">
-            <Image
-              src="/images/LogoSidebar.png"
+            <img
+              src={workspaceLogo}
               alt="Talka"
-              width={20}
-              height={20}
-              className="object-contain"
+              style={{ width: "20px", height: "20px", objectFit: "contain", borderRadius: "4px" }}
             />
-            <span className="text-xs font-bold tracking-[0.2em] text-white">
-              TALKA
+            <span className="text-xs font-bold tracking-[0.2em] text-white uppercase">
+              {selectedWorkspace === "Work Space" ? "TALKA" : selectedWorkspace}
             </span>
           </div>
         </div>

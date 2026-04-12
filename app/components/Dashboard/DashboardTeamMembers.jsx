@@ -12,14 +12,12 @@ export default function DashboardTeamMembers() {
     const fetchTeamMembers = async () => {
       try {
         setLoading(true);
-        const mockMembers = [
-            { id: 1, name: "Somchai Admin", role: "Owner", avatar: "https://ui-avatars.com/api/?name=Somchai+Admin&background=BE7EC7&color=fff", isOnline: true },
-            { id: 2, name: "Employee A", role: "Manager", avatar: "https://ui-avatars.com/api/?name=Employee+A&background=4ade80&color=fff", isOnline: true },
-            { id: 3, name: "Employee B", role: "Member", avatar: "https://ui-avatars.com/api/?name=Employee+B&background=60a5fa&color=fff", isOnline: false },
-            { id: 4, name: "Employee C", role: "Member", avatar: "https://ui-avatars.com/api/?name=Employee+C&background=fb7185&color=fff", isOnline: true },
-            { id: 5, name: "Employee D", role: "Member", avatar: "https://ui-avatars.com/api/?name=Employee+D&background=facc15&color=fff", isOnline: false },
-        ];
-        setTimeout(() => { setMembers(mockMembers); setLoading(false); }, 600);
+        const res = await fetch('/api/dashboard/my-team-members');
+        if (res.ok) {
+           const data = await res.json();
+           setMembers(data.members || []);
+        }
+        setLoading(false);
       } catch (error) { setLoading(false); }
     };
     fetchTeamMembers();

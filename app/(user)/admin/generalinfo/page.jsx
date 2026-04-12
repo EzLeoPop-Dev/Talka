@@ -14,6 +14,7 @@ function GeneralInfoContent() {
   const [workspaceName, setWorkspaceName] = useState("");
   const [timeout, setTimeoutValue] = useState(30);
   const [timezone, setTimezone] = useState("(GMT+07:00) Asia/Bangkok");
+  const [logoUrl, setLogoUrl] = useState("");
   const [loading, setLoading] = useState(true);
   
   // Mock Usage Data
@@ -30,20 +31,39 @@ function GeneralInfoContent() {
     const fetchWorkspaceInfo = async () => {
       try {
         setLoading(true);
-        // [Mock Data Simulation]
-        setTimeout(() => {
-          setWorkspaceName("My Workspace");
-          setLoading(false);
-        }, 500);
+        const res = await fetch('/api/generalinfo');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.workspaceName) setWorkspaceName(data.workspaceName);
+          if (data.timeoutMinutes) setTimeoutValue(data.timeoutMinutes);
+          if (data.timeZone) setTimezone(data.timeZone);
+          if (data.logoUrl) setLogoUrl(data.logoUrl);
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchWorkspaceInfo();
   }, [workspaceId]);
 
-  const handleSave = () => {
-    alert("Configuration updated successfully!");
+  const handleSave = async () => {
+    try {
+      const res = await fetch('/api/generalinfo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workspaceName, timeoutMinutes: timeout, timeZone: timezone, logoUrl })
+      });
+      if (res.ok) {
+        alert("Configuration updated successfully!");
+      } else {
+        alert("Failed to update configuration.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update configuration.");
+    }
   };
 
   if (loading) return (
@@ -90,14 +110,28 @@ function GeneralInfoContent() {
               
               <div className="p-8 bg-white/[0.02] border border-white/5 rounded-[2.5rem] flex flex-col md:flex-row items-center gap-10">
                 <div className="relative group">
-                  <div className="w-32 h-32 rounded-[2.5rem] bg-[#1F192E] border-2 border-dashed border-white/10 flex flex-col items-center justify-center overflow-hidden group-hover:border-[#BE7EC7]/50 transition-all cursor-pointer relative">
-                    <Camera size={28} className="text-white/10 group-hover:text-[#BE7EC7] transition-colors mb-2" />
-                    <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest">Upload Logo</span>
+                  <label className="w-32 h-32 rounded-[2.5rem] bg-[#1F192E] border-2 border-dashed border-white/10 flex flex-col items-center justify-center overflow-hidden group-hover:border-[#BE7EC7]/50 transition-all cursor-pointer relative cursor-pointer block">
+                    {logoUrl ? (
+                      <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center mt-3">
+                        <Camera size={28} className="text-white/10 group-hover:text-[#BE7EC7] transition-colors mb-2" />
+                        <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest text-center">Upload<br/>Logo</span>
+                      </div>
+                    )}
                     {/* Hover Overlay */}
-                    <div className="absolute inset-0 bg-[#BE7EC7]/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                       <Plus size={24} className="text-[#BE7EC7]" />
+                    <div className="absolute inset-0 bg-[#BE7EC7]/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                       <Plus size={24} className="text-white" />
                     </div>
-                  </div>
+                    <input type="file" className="hidden" accept="image/*" onChange={(e) => {
+                       const file = e.target.files[0];
+                       if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => setLogoUrl(reader.result);
+                          reader.readAsDataURL(file);
+                       }
+                    }} />
+                  </label>
                 </div>
                 
                 <div className="flex-1 space-y-4">
