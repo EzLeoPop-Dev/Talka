@@ -9,6 +9,15 @@ import { useSession } from "next-auth/react";
 export default function UserSettingPage() {
   const { data: session } = useSession();
   
+  const roleDisplayMap = {
+    MANAGER: "Owner (Full Control)",
+    ADMIN: "Administrator",
+    EMPLOYEE: "Standard Employee",
+    USER: "Default User"
+  };
+
+  const getRoleDisplay = (r) => roleDisplayMap[r] || r;
+
   const [users, setUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -16,8 +25,9 @@ export default function UserSettingPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState("add");
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState("Employee");
+  const [role, setRole] = useState("EMPLOYEE");
   const [editId, setEditId] = useState(null);
+  const [emailError, setEmailError] = useState("");
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -69,7 +79,8 @@ export default function UserSettingPage() {
   const openAddModal = () => {
     setMode("add");
     setEmail("");
-    setRole("Employee");
+    setRole("EMPLOYEE");
+    setEmailError("");
     setIsOpen(true);
   };
 
@@ -78,6 +89,7 @@ export default function UserSettingPage() {
     setEditId(user.id);
     setEmail(user.email);
     setRole(user.role);
+    setEmailError("");
     setIsOpen(true);
   };
 
@@ -106,8 +118,21 @@ export default function UserSettingPage() {
     }
   };
 
+  const validateEmail = (emailStr) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(emailStr);
+  };
+
   const handleAddUser = async () => {
-    if (!email.trim()) return;
+    if (!email.trim()) {
+      setEmailError("Email is required");
+      return;
+    }
+    if (!validateEmail(email)) {
+      setEmailError("Please enter a valid email address (e.g. name@company.com)");
+      return;
+    }
+    setEmailError("");
     try {
       setIsLoading(true);
       const response = await fetch("/api/users", {
@@ -134,6 +159,16 @@ export default function UserSettingPage() {
   };
 
   const handleEditUser = async () => {
+    if (!email.trim()) {
+      setEmailError("Email is required");
+      return;
+    }
+    if (!validateEmail(email)) {
+      setEmailError("Please enter a valid email address");
+      return;
+    }
+    setEmailError("");
+
     try {
       setIsLoading(true);
       const response = await fetch(`/api/users/${editId}`, {
@@ -219,8 +254,8 @@ export default function UserSettingPage() {
                       <div className="flex items-center gap-3">
                         <span className="text-white font-bold tracking-tight">{user.name || "Unnamed User"}</span>
                         {isMe && <span className="bg-[#BE7EC7] text-[9px] px-2 py-0.5 rounded-md font-black uppercase tracking-widest">You</span>}
-                        <span className={`text-[10px] font-black uppercase tracking-[0.15em] ml-2 ${user.role === 'Owner' || user.role === 'Admin' ? 'text-amber-400' : 'text-white/30'}`}>
-                          {user.role}
+                        <span className={`text-[10px] font-black uppercase tracking-[0.15em] ml-2 ${user.role === 'MANAGER' || user.role === 'ADMIN' ? 'text-amber-400' : 'text-white/30'}`}>
+                          {getRoleDisplay(user.role)}
                         </span>
                       </div>
                       <span className="text-white/40 text-xs mt-0.5 font-medium">{user.email}</span>
@@ -286,8 +321,20 @@ export default function UserSettingPage() {
                 <label className={labelClass}>User Email Address</label>
                 <div className="relative">
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={16} />
-                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={`${inputClass} pl-11`} placeholder="name@company.com" />
+                  <input 
+                    type="email" 
+                    value={email} 
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (emailError) setEmailError("");
+                    }} 
+                    className={`${inputClass} pl-11 ${emailError ? 'border-red-500/50' : ''}`} 
+                    placeholder="name@company.com" 
+                  />
                 </div>
+                {emailError && (
+                  <p className="text-red-500 text-xs mt-1.5 ml-2 font-medium">{emailError}</p>
+                )}
               </div>
 
               <div>
@@ -295,9 +342,9 @@ export default function UserSettingPage() {
                 <div className="relative">
                   <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={16} />
                   <select value={role} onChange={(e) => setRole(e.target.value)} className={`${inputClass} pl-11 appearance-none cursor-pointer`}>
-                    <option value="Owner" className="bg-[#1F192E]">Owner (Full Control)</option>
-                    <option value="Admin" className="bg-[#1F192E]">Administrator</option>
-                    <option value="Employee" className="bg-[#1F192E]">Standard Employee</option>
+                    <option value="MANAGER" className="bg-[#1F192E]">Owner (Full Control)</option>
+                    <option value="ADMIN" className="bg-[#1F192E]">Administrator</option>
+                    <option value="EMPLOYEE" className="bg-[#1F192E]">Standard Employee</option>
                   </select>
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none">▼</div>
                 </div>

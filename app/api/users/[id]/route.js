@@ -11,15 +11,11 @@ export async function PATCH(request, { params }) {
         const body = await request.json();
         const { email, role } = body;
 
-        let dbRole = "EMPLOYEE";
-        if (role === "Owner" || role === "Admin") dbRole = "ADMIN";
-        if (role === "Employee") dbRole = "EMPLOYEE";
-
         const updatedUser = await prisma.user.update({
             where: { user_id: id },
             data: {
                 email: email,
-                role: dbRole
+                role: role
             },
         });
 

@@ -15,17 +15,12 @@ export default function DashboardStats() {
         const fetchDashboardStats = async () => {
             try {
                 setIsLoading(true);
-                const mockData = {
-                    newCustomers: 12,
-                    unreplied: 5,
-                    incomingMessages: 128,
-                    closedChatPercent: "85.50"
-                };
-
-                setTimeout(() => {
-                    setStats(mockData);
-                    setIsLoading(false);
-                }, 800);
+                const res = await fetch('/api/dashboard/stats');
+                if (res.ok) {
+                    const data = await res.json();
+                    setStats(data);
+                }
+                setIsLoading(false);
             } catch (error) {
                 setIsLoading(false);
             }

@@ -31,16 +31,12 @@ export async function POST(request) {
         const body = await request.json();
         const { name, email, role } = body;
 
-        let dbRole = "EMPLOYEE";
-        if (role === "Owner" || role === "Admin") dbRole = "ADMIN";
-        if (role === "Employee") dbRole = "EMPLOYEE";
-
         const newUser = await prisma.user.create({
             data: {
                 username: name,
                 email: email,
                 password: "defaultPassword123!",
-                role: dbRole,
+                role: role,
                 is_setup: true
             },
         });
