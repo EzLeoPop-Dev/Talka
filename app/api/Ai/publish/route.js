@@ -3,6 +3,35 @@ import { prisma } from '@/lib/prisma';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
+/**
+ * @swagger
+ * /api/Ai/publish:
+ *   post:
+ *     summary: POST for /api/Ai/publish
+ *     tags: [Ai]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             example: { "exampleKey": "exampleValue" }
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *             example: { "success": true }
+ *       500:
+ *         description: "ไม่สามารถบันทึกข้อมูลได้"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "ไม่สามารถบันทึกข้อมูลได้" }
+ */
 export async function POST(req) {
     try {
         // 1. ดึง Session เพื่อหาว่าใครกำลังใช้งานอยู่

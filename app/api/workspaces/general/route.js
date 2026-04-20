@@ -5,6 +5,50 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { pusherServer } from "@/lib/pusher";
 
 // 🟢 GET: ดึงข้อมูล Workspace
+/**
+ * @swagger
+ * /api/workspaces/general:
+ *   get:
+ *     summary: GET for /api/workspaces/general
+ *     tags: [Workspaces]
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Workspace'
+ *       400:
+ *         description: "Missing Workspace ID"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Missing Workspace ID" }
+ *       401:
+ *         description: "Unauthorized"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Unauthorized" }
+ *       403:
+ *         description: "คุณไม่มีสิทธิ์เข้าถึง Workspace นี้"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "คุณไม่มีสิทธิ์เข้าถึง Workspace นี้" }
+ *       500:
+ *         description: "Internal Server Error"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Internal Server Error" }
+ */
 export async function GET(req) {
     try {
         const session = await getServerSession(authOptions);
@@ -88,6 +132,54 @@ export async function GET(req) {
 }
 
 // 🟢 PUT: อัปเดตข้อมูล Workspace
+/**
+ * @swagger
+ * /api/workspaces/general:
+ *   put:
+ *     summary: PUT for /api/workspaces/general
+ *     tags: [Workspaces]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Workspace'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Workspace'
+ *       400:
+ *         description: "ข้อมูลไม่ครบถ้วน"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "ข้อมูลไม่ครบถ้วน" }
+ *       401:
+ *         description: "Unauthorized"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Unauthorized" }
+ *       403:
+ *         description: "คุณไม่มีสิทธิ์แก้ไข Workspace นี้"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "คุณไม่มีสิทธิ์แก้ไข Workspace นี้" }
+ *       500:
+ *         description: "Internal Server Error"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Internal Server Error" }
+ */
 export async function PUT(req) {
     try {
         const session = await getServerSession(authOptions);
@@ -136,6 +228,49 @@ export async function PUT(req) {
 }
 
 // 🔴 DELETE: ลบ Workspace
+/**
+ * @swagger
+ * /api/workspaces/general:
+ *   delete:
+ *     summary: DELETE for /api/workspaces/general
+ *     tags: [Workspaces]
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *             example: { "success": true }
+ *       400:
+ *         description: "Missing Workspace ID"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Missing Workspace ID" }
+ *       401:
+ *         description: "Unauthorized"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Unauthorized" }
+ *       403:
+ *         description: "มีเฉพาะ Owner เท่านั้นที่สามารถลบ Workspace ได้"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "มีเฉพาะ Owner เท่านั้นที่สามารถลบ Workspace ได้" }
+ *       500:
+ *         description: "Workspace deleted successfully."
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Workspace deleted successfully." }
+ */
 export async function DELETE(req) {
     try {
         const session = await getServerSession(authOptions);

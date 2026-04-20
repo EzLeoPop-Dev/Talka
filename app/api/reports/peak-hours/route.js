@@ -5,6 +5,35 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 const prisma = new PrismaClient();
 
+/**
+ * @swagger
+ * /api/reports/peak-hours:
+ *   get:
+ *     summary: GET for /api/reports/peak-hours
+ *     tags: [Reports]
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *             example: { "success": true }
+ *       400:
+ *         description: "No workspace selected"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "No workspace selected" }
+ *       500:
+ *         description: "Failed to fetch peak hours"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Failed to fetch peak hours" }
+ */
 export async function GET(request) {
   try {
     const session = await getServerSession(authOptions);

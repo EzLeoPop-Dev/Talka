@@ -2,6 +2,42 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { pusherServer } from "@/lib/pusher";
 
+/**
+ * @swagger
+ * /api/Chatlog/{id}/logs:
+ *   get:
+ *     summary: GET for /api/Chatlog/{id}/logs
+ *     tags: [Chatlog]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "1"
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *             example: { "success": true }
+ *       400:
+ *         description: "No ID provided"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "No ID provided" }
+ *       500:
+ *         description: "Failed to fetch logs"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Failed to fetch logs" }
+ */
 export async function GET(req, context) {
     try {
         const params = await Promise.resolve(context.params);
@@ -27,6 +63,42 @@ export async function GET(req, context) {
 }
 
 // 🔥 บันทึกข้อมูล Log (POST) - ใส่ Pusher เพิ่ม
+/**
+ * @swagger
+ * /api/Chatlog/{id}/logs:
+ *   post:
+ *     summary: POST for /api/Chatlog/{id}/logs
+ *     tags: [Chatlog]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "1"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             example: { "exampleKey": "exampleValue" }
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *             example: { "success": true }
+ *       500:
+ *         description: "Failed to save log"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Failed to save log" }
+ */
 export async function POST(req, context) {
     try {
         const params = await Promise.resolve(context.params);

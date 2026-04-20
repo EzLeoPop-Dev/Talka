@@ -5,6 +5,29 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 const prisma = new PrismaClient();
 
+/**
+ * @swagger
+ * /api/dashboard/my-team-members:
+ *   get:
+ *     summary: GET for /api/dashboard/my-team-members
+ *     tags: [Dashboard]
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
+ *       500:
+ *         description: "Failed to fetch team members"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Failed to fetch team members" }
+ */
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);

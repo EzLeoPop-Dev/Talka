@@ -5,10 +5,47 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * @swagger
+ * /api/workspaces/members:
+ *   get:
+ *     summary: GET for /api/workspaces/members
+ *     tags: [Workspaces]
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Workspace'
+ *       401:
+ *         description: "Unauthorized"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Unauthorized" }
+ *       404:
+ *         description: "User not found"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "User not found" }
+ *       500:
+ *         description: "Internal Server Error"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Internal Server Error" }
+ */
 export async function GET(req) {
     try {
         const session = await getServerSession(authOptions);
-        
+
         if (!session || !session.user || !session.user.email) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
@@ -26,7 +63,7 @@ export async function GET(req) {
         });
 
         if (!myWorkspace) {
-            return NextResponse.json([]); 
+            return NextResponse.json([]);
         }
 
         // 2. ดึงสมาชิกทุกคนที่อยู่ใน Workspace เดียวกับเรา

@@ -6,6 +6,43 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 export const dynamic = "force-dynamic";
 
 // ดึง ID ทีมปัจจุบันที่ใช้งานอยู่
+/**
+ * @swagger
+ * /api/users/current-workspace:
+ *   get:
+ *     summary: GET for /api/users/current-workspace
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
+ *       401:
+ *         description: "Unauthorized"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Unauthorized" }
+ *       404:
+ *         description: "User not found"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "User not found" }
+ *       500:
+ *         description: "Internal Server Error"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Internal Server Error" }
+ */
 export async function GET() {
     try {
         const session = await getServerSession(authOptions);
@@ -28,7 +65,7 @@ export async function GET() {
 
             // ถ้าหาไม่เจอ แปลว่าโดนเตะออกไปแล้ว! ให้ล้างค่า activeWsId เป็น null ทันที
             if (!checkMembership) {
-                activeWsId = null; 
+                activeWsId = null;
             }
         }
 
@@ -53,6 +90,47 @@ export async function GET() {
     }
 }
 
+/**
+ * @swagger
+ * /api/users/current-workspace:
+ *   post:
+ *     summary: POST for /api/users/current-workspace
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       400:
+ *         description: "Missing Workspace ID"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Missing Workspace ID" }
+ *       401:
+ *         description: "Unauthorized"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Unauthorized" }
+ *       500:
+ *         description: "Internal Server Error"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Internal Server Error" }
+ */
 export async function POST(req) {
     try {
         const session = await getServerSession(authOptions);

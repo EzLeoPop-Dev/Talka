@@ -4,6 +4,22 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { pusherServer } from "@/lib/pusher";
 
+/**
+ * @swagger
+ * /api/workspaces/invite/respond:
+ *   get:
+ *     summary: GET for /api/workspaces/invite/respond
+ *     tags: [Workspaces]
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Workspace'
+ */
 export async function GET(req) {
     try {
         const session = await getServerSession(authOptions);
@@ -33,6 +49,47 @@ export async function GET(req) {
 }
 
 // กดตอบรับ/ปฏิเสธคำเชิญ
+/**
+ * @swagger
+ * /api/workspaces/invite/respond:
+ *   post:
+ *     summary: POST for /api/workspaces/invite/respond
+ *     tags: [Workspaces]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Workspace'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Workspace'
+ *       400:
+ *         description: "คำเชิญไม่ถูกต้องหรือหมดอายุ"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "คำเชิญไม่ถูกต้องหรือหมดอายุ" }
+ *       401:
+ *         description: "Unauthorized"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Unauthorized" }
+ *       500:
+ *         description: "Internal Server Error"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Internal Server Error" }
+ */
 export async function POST(req) {
     try {
         const session = await getServerSession(authOptions);

@@ -10,6 +10,40 @@ function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
+/**
+ * @swagger
+ * /api/auth/register:
+ *   post:
+ *     summary: POST for /api/auth/register
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       400:
+ *         description: "อีเมลนี้ถูกใช้งานแล้ว"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "อีเมลนี้ถูกใช้งานแล้ว" }
+ *       500:
+ *         description: "เกิดข้อผิดพลาดที่เซิร์ฟเวอร์ หรือการส่งอีเมลล้มเหลว"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "เกิดข้อผิดพลาดที่เซิร์ฟเวอร์ หรือการส่งอีเมลล้มเหลว" }
+ */
 export async function POST(request) {
   try {
     const { username, email, password } = await request.json();
@@ -77,9 +111,9 @@ export async function POST(request) {
     await transporter.sendMail(mailOptions);
 
     // 7. ตอบกลับหน้าเว็บว่าสำเร็จ เพื่อให้หน้าเว็บเปลี่ยนไปหน้ากรอก OTP
-    return NextResponse.json({ 
-        success: true, 
-        message: "โปรดเช็คอีเมลเพื่อรับรหัสยืนยัน 6 หลัก" 
+    return NextResponse.json({
+      success: true,
+      message: "โปรดเช็คอีเมลเพื่อรับรหัสยืนยัน 6 หลัก"
     }, { status: 201 });
 
   } catch (error) {

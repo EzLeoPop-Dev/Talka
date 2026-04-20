@@ -1,6 +1,33 @@
 import { NextResponse } from "next/server";
 import { pusherServer } from "@/lib/pusher";
 
+/**
+ * @swagger
+ * /api/chats/presence:
+ *   post:
+ *     summary: POST for /api/chats/presence
+ *     tags: [Chats]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ChatSession'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ChatSession'
+ *       500:
+ *         description: "Presence error"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Presence error" }
+ */
 export async function POST(req) {
     try {
         const body = await req.json();

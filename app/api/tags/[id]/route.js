@@ -5,6 +5,33 @@ import { pusherServer } from "@/lib/pusher";
 const prisma = new PrismaClient();
 
 // อัปเดตข้อมูล Tag (PATCH) - [อัปเดตสี]
+/**
+ * @swagger
+ * /api/tags/{id}:
+ *   patch:
+ *     summary: PATCH for /api/tags/{id}
+ *     tags: [Tags]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "1"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Tag'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Tag'
+ */
 export async function PATCH(request, { params }) {
     try {
         const resolvedParams = await params;
@@ -31,6 +58,28 @@ export async function PATCH(request, { params }) {
 }
 
 // ลบ Tag (DELETE)
+/**
+ * @swagger
+ * /api/tags/{id}:
+ *   delete:
+ *     summary: DELETE for /api/tags/{id}
+ *     tags: [Tags]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "1"
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *             example: { "success": true }
+ */
 export async function DELETE(request, { params }) {
     try {
         const resolvedParams = await params;

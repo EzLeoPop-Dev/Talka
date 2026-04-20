@@ -4,6 +4,27 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 // ดึงข้อมูลลูกค้าตามรหัส (GET)
+/**
+ * @swagger
+ * /api/customers/{id}:
+ *   get:
+ *     summary: GET for /api/customers/{id}
+ *     tags: [Customers]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "1"
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Customer'
+ */
 export async function GET(request, { params }) {
     try {
         const { id } = params;
@@ -73,6 +94,33 @@ export async function GET(request, { params }) {
 }
 
 // อัปเดตข้อมูลลูกค้า (PUT)
+/**
+ * @swagger
+ * /api/customers/{id}:
+ *   put:
+ *     summary: PUT for /api/customers/{id}
+ *     tags: [Customers]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "1"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Customer'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Customer'
+ */
 export async function PUT(request, { params }) {
     try {
         const { id } = params;
@@ -164,6 +212,28 @@ export async function PUT(request, { params }) {
 }
 
 // ลบลูกค้า (DELETE)
+/**
+ * @swagger
+ * /api/customers/{id}:
+ *   delete:
+ *     summary: DELETE for /api/customers/{id}
+ *     tags: [Customers]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "1"
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *             example: { "success": true }
+ */
 export async function DELETE(request, { params }) {
     try {
         const { id } = params;

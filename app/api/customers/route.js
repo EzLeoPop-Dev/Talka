@@ -4,6 +4,29 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 // ดึงรายชื่อลูกค้าทั้งหมด (GET)
+/**
+ * @swagger
+ * /api/customers:
+ *   get:
+ *     summary: GET for /api/customers
+ *     tags: [Customers]
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Customer'
+ *       500:
+ *         description: "Failed to fetch customers"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Failed to fetch customers" }
+ */
 export async function GET() {
     try {
         const customers = await prisma.customer.findMany({
@@ -82,11 +105,11 @@ export async function GET() {
                 tags: tags,
                 status: primaryChatSession?.status || "Open",
                 lastMessage: lastMessage,
-                time: primaryChatSession?.start_time 
-                    ? new Date(primaryChatSession.start_time).toLocaleTimeString('en-US', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                      })
+                time: primaryChatSession?.start_time
+                    ? new Date(primaryChatSession.start_time).toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })
                     : "",
                 created_at: customer.created_at
             };
@@ -100,6 +123,40 @@ export async function GET() {
 }
 
 // เพิ่มลูกค้าใหม่ (POST)
+/**
+ * @swagger
+ * /api/customers:
+ *   post:
+ *     summary: POST for /api/customers
+ *     tags: [Customers]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Customer'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Customer'
+ *       400:
+ *         description: "Name is required"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Name is required" }
+ *       500:
+ *         description: "Failed to create customer"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Failed to create customer" }
+ */
 export async function POST(request) {
     try {
         const body = await request.json();
@@ -151,15 +208,15 @@ export async function POST(request) {
         if (tags && Array.isArray(tags) && tags.length > 0) {
             const tagData = tags[0];
             // รองรับทั้งฟอร์แมต .id และ .tag_id
-            const tagId = tagData.id || tagData.tag_id; 
+            const tagId = tagData.id || tagData.tag_id;
             const parsedId = parseInt(tagId);
-            
+
             // 👈 เช็คว่าแปลงเป็นตัวเลขได้จริง ป้องกัน Prisma พัง (NaN Error)
-            if (!isNaN(parsedId)) { 
+            if (!isNaN(parsedId)) {
                 const foundTag = await prisma.tag.findUnique({
                     where: { tag_id: parsedId }
                 });
-                
+
                 if (foundTag) {
                     await prisma.chatTag.create({
                         data: {
@@ -167,7 +224,7 @@ export async function POST(request) {
                             tag_id: foundTag.tag_id
                         }
                     });
-                    
+
                     // เตรียมข้อมูลส่งกลับไปให้หน้าเว็บแสดงผลสีและชื่อทันที
                     assignedTagInfo = {
                         id: foundTag.tag_id,
@@ -192,7 +249,7 @@ export async function POST(request) {
             company: newCustomer.company,
             country: newCustomer.country,
             // 👈 ส่งข้อมูล Tag กลับไปแสดงผล
-            tags: assignedTagInfo ? [assignedTagInfo] : [], 
+            tags: assignedTagInfo ? [assignedTagInfo] : [],
             status: "Open",
             channel: channel || "Direct",
             platform: channel?.toLowerCase() || "direct"

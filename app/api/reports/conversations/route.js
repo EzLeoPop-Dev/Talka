@@ -5,6 +5,35 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 const prisma = new PrismaClient();
 
+/**
+ * @swagger
+ * /api/reports/conversations:
+ *   get:
+ *     summary: GET for /api/reports/conversations
+ *     tags: [Reports]
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *             example: { "success": true }
+ *       400:
+ *         description: "No workspace selected"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "No workspace selected" }
+ *       500:
+ *         description: "Failed to fetch conversations report"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Failed to fetch conversations report" }
+ */
 export async function GET(request) {
   try {
     const session = await getServerSession(authOptions);

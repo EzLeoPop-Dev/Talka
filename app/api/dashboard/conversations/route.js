@@ -3,6 +3,29 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+/**
+ * @swagger
+ * /api/dashboard/conversations:
+ *   get:
+ *     summary: GET for /api/dashboard/conversations
+ *     tags: [Dashboard]
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
+ *       500:
+ *         description: "Failed to fetch chart data"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Failed to fetch chart data" }
+ */
 export async function GET(request) {
   try {
     // 1. รับค่าตัวเลือกจากหน้าเว็บ (เช่น 'Today', 'Last 7 Days')

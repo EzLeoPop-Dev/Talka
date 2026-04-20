@@ -4,6 +4,54 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
+/**
+ * @swagger
+ * /api/users/change-password:
+ *   post:
+ *     summary: POST for /api/users/change-password
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       400:
+ *         description: "กรุณากรอกข้อมูลให้ครบถ้วน OR บัญชีของคุณเข้าสู่ระบบผ่าน Google จึงไม่สามารถเปลี่ยนรหัสผ่านในระบบได้ OR รหัสผ่านปัจจุบันไม่ถูกต้อง"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "กรุณากรอกข้อมูลให้ครบถ้วน OR บัญชีของคุณเข้าสู่ระบบผ่าน Google จึงไม่สามารถเปลี่ยนรหัสผ่านในระบบได้ OR รหัสผ่านปัจจุบันไม่ถูกต้อง" }
+ *       401:
+ *         description: "Unauthorized: กรุณาเข้าสู่ระบบ"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Unauthorized: กรุณาเข้าสู่ระบบ" }
+ *       404:
+ *         description: "ไม่พบข้อมูลผู้ใช้"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "ไม่พบข้อมูลผู้ใช้" }
+ *       500:
+ *         description: "เกิดข้อผิดพลาดที่เซิร์ฟเวอร์"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "เกิดข้อผิดพลาดที่เซิร์ฟเวอร์" }
+ */
 export async function POST(request) {
   try {
     const session = await getServerSession(authOptions);

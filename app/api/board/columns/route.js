@@ -7,6 +7,29 @@ export const fetchCache = "force-no-store";
 export const revalidate = 0;
 
 // 🟢 GET ปล่อยผ่านเหมือนเดิม
+/**
+ * @swagger
+ * /api/board/columns:
+ *   get:
+ *     summary: GET for /api/board/columns
+ *     tags: [Board]
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/BoardColumn'
+ *       500:
+ *         description: "Failed to fetch columns"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Failed to fetch columns" }
+ */
 export async function GET() {
     try {
         const columns = await prisma.boardColumn.findMany({
@@ -23,7 +46,7 @@ export async function GET() {
             });
             responseData = await prisma.boardColumn.findMany({ orderBy: { order_index: 'asc' } });
         }
-        
+
         return NextResponse.json(responseData, {
             headers: {
                 "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
@@ -38,6 +61,33 @@ export async function GET() {
 }
 
 //  POST (สร้างคอลัมน์ใหม่)
+/**
+ * @swagger
+ * /api/board/columns:
+ *   post:
+ *     summary: POST for /api/board/columns
+ *     tags: [Board]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/BoardColumn'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/BoardColumn'
+ *       500:
+ *         description: "Failed to create column"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Failed to create column" }
+ */
 export async function POST(req) {
     try {
         const body = await req.json();

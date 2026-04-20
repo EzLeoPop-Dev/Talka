@@ -4,6 +4,33 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 // อัปเดตข้อมูลทีม (PATCH)
+/**
+ * @swagger
+ * /api/teams/{id}:
+ *   patch:
+ *     summary: PATCH for /api/teams/{id}
+ *     tags: [Teams]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "1"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Team'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Team'
+ */
 export async function PATCH(request, { params }) {
     try {
         const resolvedParams = await params;
@@ -57,6 +84,28 @@ export async function PATCH(request, { params }) {
 }
 
 // ลบทีม (DELETE)
+/**
+ * @swagger
+ * /api/teams/{id}:
+ *   delete:
+ *     summary: DELETE for /api/teams/{id}
+ *     tags: [Teams]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "1"
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *             example: { "success": true }
+ */
 export async function DELETE(request, { params }) {
     try {
         const resolvedParams = await params;

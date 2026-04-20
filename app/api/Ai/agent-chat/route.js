@@ -1,5 +1,41 @@
 import { NextResponse } from 'next/server';
 
+/**
+ * @swagger
+ * /api/Ai/agent-chat:
+ *   post:
+ *     summary: POST for /api/Ai/agent-chat
+ *     tags: [Ai]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             example: { "exampleKey": "exampleValue" }
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *             example: { "success": true }
+ *       400:
+ *         description: "กรุณาส่งข้อความ"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "กรุณาส่งข้อความ" }
+ *       500:
+ *         description: "ไม่ได้ตั้งค่า API Key OR AI ไม่ตอบสนอง"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "ไม่ได้ตั้งค่า API Key OR AI ไม่ตอบสนอง" }
+ */
 export async function POST(req) {
     try {
         const body = await req.json();

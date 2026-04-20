@@ -4,6 +4,28 @@ import { prisma } from '@/lib/prisma'; // เช็ค path ของ prisma ใ
 // ==========================================
 // 1. GET: ดึงข้อมูล Agent ทั้งหมดมาโชว์ในตาราง
 // ==========================================
+/**
+ * @swagger
+ * /api/Ai/agents:
+ *   get:
+ *     summary: GET for /api/Ai/agents
+ *     tags: [Ai]
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *             example: { "success": true }
+ *       500:
+ *         description: "ไม่สามารถดึงข้อมูล Agent ได้"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "ไม่สามารถดึงข้อมูล Agent ได้" }
+ */
 export async function GET() {
     try {
         const agents = await prisma.aiAgent.findMany({
@@ -19,6 +41,35 @@ export async function GET() {
 // ==========================================
 // 2. DELETE: รับคำสั่งลบ Agent จากหน้าเว็บ
 // ==========================================
+/**
+ * @swagger
+ * /api/Ai/agents:
+ *   delete:
+ *     summary: DELETE for /api/Ai/agents
+ *     tags: [Ai]
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *             example: { "success": true }
+ *       400:
+ *         description: "ไม่พบ ID ที่ต้องการลบ"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "ไม่พบ ID ที่ต้องการลบ" }
+ *       500:
+ *         description: "ไม่สามารถลบ Agent ได้"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "ไม่สามารถลบ Agent ได้" }
+ */
 export async function DELETE(req) {
     try {
         // ดึง id ที่แนบมากับ URL (เช่น /api/Ai/agents?id=5)
