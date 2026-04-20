@@ -3,6 +3,130 @@ import { prisma } from "@/lib/prisma"; // 🟢 ใช้ตัวแปร prism
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
+/**
+ * @swagger
+ * /api/teams:
+ *   get:
+ *     summary: ดึงรายชื่อทีมใน Workspace ปัจจุบัน
+ *     tags: [Teams]
+ *     responses:
+ *       200:
+ *         description: ดึงทีมสำเร็จ
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     example: 1
+ *                   name:
+ *                     type: string
+ *                     example: "Support Team"
+ *                   desc:
+ *                     type: string
+ *                     example: "ทีมดูแลลูกค้า"
+ *                   members:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                     example: ["john", "alice"]
+ *                   memberDetails:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: integer
+ *                           example: 1
+ *                         name:
+ *                           type: string
+ *                           example: "john"
+ *                         email:
+ *                           type: string
+ *                           example: "john@email.com"
+ *                         image:
+ *                           type: string
+ *                           example: "/profile.jpg"
+ *                   platforms:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                     example: ["facebook", "line"]
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "Unauthorized"
+ *       500:
+ *         description: Server Error
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "Failed to fetch teams"
+ *
+ *   post:
+ *     summary: สร้างทีมใหม่
+ *     tags: [Teams]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Support Team"
+ *               desc:
+ *                 type: string
+ *                 example: "ทีมดูแลลูกค้า"
+ *               members:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["john", "alice"]
+ *               platforms:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["facebook", "line"]
+ *     responses:
+ *       201:
+ *         description: สร้างทีมสำเร็จ
+ *         content:
+ *           application/json:
+ *             example:
+ *               id: 1
+ *               name: "Support Team"
+ *               desc: "ทีมดูแลลูกค้า"
+ *               members: ["john", "alice"]
+ *               platforms: ["facebook", "line"]
+ *       400:
+ *         description: ข้อมูลไม่ถูกต้อง
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "No Workspace Found"
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "Unauthorized"
+ *       500:
+ *         description: Server Error
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "Failed to create team"
+ */
+
 // ดึงรายชื่อทีมเฉพาะใน Workspace ของตัวเอง (GET)
 export async function GET() {
     try {
