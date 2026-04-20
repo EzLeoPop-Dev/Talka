@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { dbLog, getActivityLogs, getActivityLogCount } from "@/lib/dbLogger";
 import { pusherServer } from "@/lib/pusher";
-import prisma from "@/lib/prisma";
+import {prisma} from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
