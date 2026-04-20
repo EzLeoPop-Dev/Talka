@@ -3,6 +3,35 @@ import { prisma } from "@/lib/prisma";
 import { pusherServer } from "@/lib/pusher";
 import { decryptToken } from "@/lib/encryption";
 
+/**
+ * @swagger
+ * /api/webhook/meta:
+ *   post:
+ *     summary: POST for /api/webhook/meta
+ *     tags: [Webhook]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             example: { "exampleKey": "exampleValue" }
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *             example: { "success": true }
+ *       500:
+ *         description: "Internal Server Error"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Internal Server Error" }
+ */
 export async function POST(req) {
   try {
     const body = await req.json();
@@ -320,6 +349,21 @@ export async function POST(req) {
   }
 }
 
+/**
+ * @swagger
+ * /api/webhook/meta:
+ *   get:
+ *     summary: GET for /api/webhook/meta
+ *     tags: [Webhook]
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *             example: { "success": true }
+ */
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   if (searchParams.get("hub.mode") === "subscribe" && searchParams.get("hub.verify_token") === process.env.FACEBOOK_VERIFY_TOKEN) {

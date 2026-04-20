@@ -5,6 +5,61 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { pusherServer } from "@/lib/pusher";
 import { encryptToken } from "@/lib/encryption";
 
+/**
+ * @swagger
+ * /api/channels/create:
+ *   post:
+ *     summary: POST for /api/channels/create
+ *     tags: [Channels]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Channel'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Channel'
+ *       400:
+ *         description: "Missing required fields OR บล็อคการเชื่อมต่อ! เพจนี้ถูกทีมอื่นใช้งานอยู่แล้ว"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Missing required fields OR บล็อคการเชื่อมต่อ! เพจนี้ถูกทีมอื่นใช้งานอยู่แล้ว" }
+ *       401:
+ *         description: "Unauthorized"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Unauthorized" }
+ *       403:
+ *         description: "คุณไม่มีสิทธิ์เชื่อมต่อช่องทางแชทในพื้นที่ทำงาน (Workspace) นี้"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "คุณไม่มีสิทธิ์เชื่อมต่อช่องทางแชทในพื้นที่ทำงาน (Workspace) นี้" }
+ *       404:
+ *         description: "User not found"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "User not found" }
+ *       500:
+ *         description: "System Error Message"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "System Error Message" }
+ */
 export async function POST(req) {
     try {
         const body = await req.json();

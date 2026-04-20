@@ -5,6 +5,61 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { pusherServer } from "@/lib/pusher";
 import { encryptToken } from "@/lib/encryption";
 
+/**
+ * @swagger
+ * /api/channels/telegram/setup:
+ *   post:
+ *     summary: POST for /api/channels/telegram/setup
+ *     tags: [Channels]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Channel'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Channel'
+ *       400:
+ *         description: "กรุณาระบุข้อมูลให้ครบถ้วน (Bot Token และ Workspace ID) OR บล็อคการเชื่อมต่อ! บอท Telegram (Token) นี้ถูกทีมอื่นใช้งานอยู่แล้ว OR Error 400"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "กรุณาระบุข้อมูลให้ครบถ้วน (Bot Token และ Workspace ID) OR บล็อคการเชื่อมต่อ! บอท Telegram (Token) นี้ถูกทีมอื่นใช้งานอยู่แล้ว OR Error 400" }
+ *       401:
+ *         description: "Unauthorized"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Unauthorized" }
+ *       403:
+ *         description: "คุณไม่มีสิทธิ์เชื่อมต่อ Telegram ในพื้นที่ทำงาน (Workspace) นี้"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "คุณไม่มีสิทธิ์เชื่อมต่อ Telegram ในพื้นที่ทำงาน (Workspace) นี้" }
+ *       404:
+ *         description: "User not found"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "User not found" }
+ *       500:
+ *         description: "ยังไม่ได้ตั้งค่า NEXT_PUBLIC_BASE_URL ใน .env OR Internal Server Error"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "ยังไม่ได้ตั้งค่า NEXT_PUBLIC_BASE_URL ใน .env OR Internal Server Error" }
+ */
 export async function POST(req) {
     try {
         const { botToken, channelName, workspaceId } = await req.json();

@@ -4,6 +4,28 @@ import { NextResponse } from 'next/server';
 const prisma = new PrismaClient();
 
 // ระบบดึงข้อมูล (GET) ไปโชว์ที่หน้าเว็บ
+/**
+ * @swagger
+ * /api/generalinfo:
+ *   get:
+ *     summary: GET for /api/generalinfo
+ *     tags: [Generalinfo]
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *             example: { "success": true }
+ *       500:
+ *         description: "ดึงข้อมูลไม่สำเร็จ"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "ดึงข้อมูลไม่สำเร็จ" }
+ */
 export async function GET() {
   try {
     // 1. ดึง Setting ปกติ
@@ -47,6 +69,35 @@ export async function GET() {
 }
 
 // ระบบบันทึก/อัปเดตข้อมูล (POST) จากหน้าเว็บลงฐานข้อมูล
+/**
+ * @swagger
+ * /api/generalinfo:
+ *   post:
+ *     summary: POST for /api/generalinfo
+ *     tags: [Generalinfo]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             example: { "exampleKey": "exampleValue" }
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *             example: { "success": true }
+ *       500:
+ *         description: "บันทึกข้อมูลไม่สำเร็จ"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "บันทึกข้อมูลไม่สำเร็จ" }
+ */
 export async function POST(request) {
   try {
     const body = await request.json();

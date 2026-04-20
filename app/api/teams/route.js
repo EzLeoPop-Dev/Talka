@@ -4,6 +4,29 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 // ดึงรายชื่อทีมทั้งหมด (GET)
+/**
+ * @swagger
+ * /api/teams:
+ *   get:
+ *     summary: GET for /api/teams
+ *     tags: [Teams]
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Team'
+ *       500:
+ *         description: "Failed to fetch teams"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Failed to fetch teams" }
+ */
 export async function GET() {
     try {
         const teams = await prisma.team.findMany({
@@ -45,6 +68,33 @@ export async function GET() {
 }
 
 // สร้างทีมใหม่ (POST)
+/**
+ * @swagger
+ * /api/teams:
+ *   post:
+ *     summary: POST for /api/teams
+ *     tags: [Teams]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Team'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Team'
+ *       500:
+ *         description: "Failed to create team"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Failed to create team" }
+ */
 export async function POST(request) {
     try {
         const body = await request.json();

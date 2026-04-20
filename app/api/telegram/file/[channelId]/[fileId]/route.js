@@ -1,6 +1,41 @@
 import { prisma } from "@/lib/prisma";
 import { decryptToken } from "@/lib/encryption";
 
+/**
+ * @swagger
+ * /api/telegram/file/{channelId}/{fileId}:
+ *   get:
+ *     summary: GET for /api/telegram/file/{channelId}/{fileId}
+ *     tags: [Telegram]
+ *     parameters:
+ *       - in: path
+ *         name: channelId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "1"
+ *       - in: path
+ *         name: fileId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "1"
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *             example: { "success": true }
+ *       500:
+ *         description: "Internal Server Error"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Internal Server Error" }
+ */
 export async function GET(req, context) {
     try {
         const params = await context.params;

@@ -5,10 +5,33 @@ import { pusherServer } from "@/lib/pusher";
 const prisma = new PrismaClient();
 
 // ดึงข้อมูล Tag ทั้งหมด (GET)
+/**
+ * @swagger
+ * /api/tags:
+ *   get:
+ *     summary: GET for /api/tags
+ *     tags: [Tags]
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Tag'
+ *       500:
+ *         description: "Failed to fetch tags"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Failed to fetch tags" }
+ */
 export async function GET() {
     try {
         const tags = await prisma.tag.findMany({
-            orderBy: { tag_id: 'desc' } 
+            orderBy: { tag_id: 'desc' }
         });
 
         const formattedTags = tags.map((tag) => {
@@ -33,6 +56,33 @@ export async function GET() {
 }
 
 // สร้าง Tag ใหม่ (POST)
+/**
+ * @swagger
+ * /api/tags:
+ *   post:
+ *     summary: POST for /api/tags
+ *     tags: [Tags]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Tag'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Tag'
+ *       500:
+ *         description: "Failed to create tag"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Failed to create tag" }
+ */
 export async function POST(request) {
     try {
         const body = await request.json();

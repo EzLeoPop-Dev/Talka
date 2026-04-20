@@ -1,5 +1,28 @@
 import { prisma } from "@/lib/prisma";
 
+/**
+ * @swagger
+ * /api/chats/allchat:
+ *   get:
+ *     summary: GET for /api/chats/allchat
+ *     tags: [Chats]
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ChatSession'
+ *       500:
+ *         description: "Internal Server Error"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Internal Server Error" }
+ */
 export async function GET() {
   try {
     const chats = await prisma.chatSession.findMany({
@@ -11,7 +34,7 @@ export async function GET() {
       include: {
         customer: true,
         platform: true,
-        channel: true, 
+        channel: true,
         messages: { orderBy: { created_at: "asc" } },
         _count: {
           select: {
@@ -38,7 +61,7 @@ export async function GET() {
       imgUrl: chat.customer?.image,
       status: chat.status,
       platform: chat.platform?.platform_name || "UNKNOWN",
-      channelName: chat.channel?.name || "", 
+      channelName: chat.channel?.name || "",
 
       workspaceId: chat.channel?.workspace_id || chat.platform?.workspace_id,
       lastMessage: chat.messages[chat.messages.length - 1]?.content || "No messages",
@@ -49,13 +72,13 @@ export async function GET() {
         external_id: m.external_id,
         //  บังคับให้แอดมินอยู่ฝั่งขวาเสมอ
         from: m.sender_type === "AGENT" || m.sender_type === "ADMIN" ? "me" : "customer",
-        
+
         //  ส่ง 2 ค่านี้ไปให้หน้าบ้านแยกแยะ
-        sender_type: m.sender_type, 
-        senderName: m.sender_type === "AGENT" || m.sender_type === "ADMIN" 
-            ? (userMap[m.sender_id] || "Agent") 
-            : (chat.customer?.name || "ลูกค้า"),
-            
+        sender_type: m.sender_type,
+        senderName: m.sender_type === "AGENT" || m.sender_type === "ADMIN"
+          ? (userMap[m.sender_id] || "Agent")
+          : (chat.customer?.name || "ลูกค้า"),
+
         text: m.content,
         type: m.message_type,
         time: m.created_at.toLocaleTimeString("th-TH", {

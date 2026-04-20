@@ -3,6 +3,28 @@ import { prisma } from "@/lib/prisma";
 import { pusherServer } from "@/lib/pusher";
 import { decryptToken } from "@/lib/encryption";
 
+/**
+ * @swagger
+ * /api/webhook/line:
+ *   post:
+ *     summary: POST for /api/webhook/line
+ *     tags: [Webhook]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             example: { "exampleKey": "exampleValue" }
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *             example: { "success": true }
+ */
 export async function POST(req) {
   try {
     const body = await req.text();
@@ -14,9 +36,9 @@ export async function POST(req) {
 
     // 2. หาบอทให้ตรงตัวเป๊ะๆ
     const channel = await prisma.channel.findFirst({
-      where: { 
-          platform_name: "LINE",
-          ...(channelIdQuery ? { channel_id: parseInt(channelIdQuery) } : {}) 
+      where: {
+        platform_name: "LINE",
+        ...(channelIdQuery ? { channel_id: parseInt(channelIdQuery) } : {})
       },
       orderBy: { channel_id: "desc" },
     });
@@ -81,7 +103,7 @@ export async function POST(req) {
               customerName = profileData.displayName;
               customerImg = profileData.pictureUrl;
             }
-          } catch (e) {}
+          } catch (e) { }
 
           if (!socialAccount) {
             const newCust = await prisma.customer.create({

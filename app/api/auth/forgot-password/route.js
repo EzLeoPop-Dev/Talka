@@ -3,6 +3,47 @@ import { prisma } from "@/lib/prisma";
 import nodemailer from "nodemailer";
 import crypto from "crypto";
 
+/**
+ * @swagger
+ * /api/auth/forgot-password:
+ *   post:
+ *     summary: POST for /api/auth/forgot-password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       400:
+ *         description: "โปรดกรอกอีเมล"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "โปรดกรอกอีเมล" }
+ *       404:
+ *         description: "ไม่พบบัญชีผู้ใช้งานที่ใช้อีเมลนี้"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "ไม่พบบัญชีผู้ใช้งานที่ใช้อีเมลนี้" }
+ *       500:
+ *         description: "ส่งลิงก์รีเซ็ตรหัสผ่านเรียบร้อยแล้ว"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "ส่งลิงก์รีเซ็ตรหัสผ่านเรียบร้อยแล้ว" }
+ */
 export async function POST(req) {
     try {
         const { email } = await req.json();

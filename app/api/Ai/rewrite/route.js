@@ -1,5 +1,41 @@
 import { NextResponse } from "next/server";
 
+/**
+ * @swagger
+ * /api/Ai/rewrite:
+ *   post:
+ *     summary: POST for /api/Ai/rewrite
+ *     tags: [Ai]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             example: { "exampleKey": "exampleValue" }
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *             example: { "success": true }
+ *       400:
+ *         description: "Missing text or action"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Missing text or action" }
+ *       500:
+ *         description: "AI response empty OR Internal Server Error"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "AI response empty OR Internal Server Error" }
+ */
 export async function POST(req) {
   try {
     const { text, action } = await req.json();

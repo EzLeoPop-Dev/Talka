@@ -3,6 +3,33 @@ import { prisma } from '@/lib/prisma';
 import { pusherServer } from '@/lib/pusher';
 import { decryptToken } from '@/lib/encryption';
 
+/**
+ * @swagger
+ * /api/chats/{chatId}/ai-mode:
+ *   post:
+ *     summary: POST for /api/chats/{chatId}/ai-mode
+ *     tags: [Chats]
+ *     parameters:
+ *       - in: path
+ *         name: chatId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "1"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ChatSession'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ChatSession'
+ */
 export async function POST(req, { params }) {
     try {
         const resolvedParams = await params; 

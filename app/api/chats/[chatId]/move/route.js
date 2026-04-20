@@ -2,6 +2,47 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { pusherServer } from "@/lib/pusher";
 
+/**
+ * @swagger
+ * /api/chats/{chatId}/move:
+ *   patch:
+ *     summary: PATCH for /api/chats/{chatId}/move
+ *     tags: [Chats]
+ *     parameters:
+ *       - in: path
+ *         name: chatId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "1"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ChatSession'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ChatSession'
+ *       400:
+ *         description: "ข้อมูลไม่ครบถ้วน (chatId หรือ columnId หาย)"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "ข้อมูลไม่ครบถ้วน (chatId หรือ columnId หาย)" }
+ *       500:
+ *         description: "ไม่สามารถบันทึกการย้ายแชทลง Database ได้"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "ไม่สามารถบันทึกการย้ายแชทลง Database ได้" }
+ */
 export async function PATCH(req, context) {
     try {
         const params = await Promise.resolve(context.params);

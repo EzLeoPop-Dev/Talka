@@ -3,6 +3,28 @@ import { prisma } from "@/lib/prisma";
 import { pusherServer } from "@/lib/pusher";
 import { decryptToken } from "@/lib/encryption";
 
+/**
+ * @swagger
+ * /api/webhook/telegram:
+ *   post:
+ *     summary: POST for /api/webhook/telegram
+ *     tags: [Webhook]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             example: { "exampleKey": "exampleValue" }
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *             example: { "success": true }
+ */
 export async function POST(req) {
   try {
     const update = await req.json();

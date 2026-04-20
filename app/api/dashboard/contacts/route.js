@@ -3,6 +3,29 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+/**
+ * @swagger
+ * /api/dashboard/contacts:
+ *   get:
+ *     summary: GET for /api/dashboard/contacts
+ *     tags: [Dashboard]
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
+ *       500:
+ *         description: "Failed to fetch contacts"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Failed to fetch contacts" }
+ */
 export async function GET() {
   try {
     // 1. ดึงข้อมูลแชทล่าสุด 10 รายการ พร้อมดึงข้อมูลลูกค้า, ช่องทาง (แพลตฟอร์ม) และ แท็ก มาด้วย!

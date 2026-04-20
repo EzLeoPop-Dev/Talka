@@ -1,8 +1,30 @@
-<<<<<<< HEAD
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 // 🟢 ดึงข้อมูล Prompt ทั้งหมด
+/**
+ * @swagger
+ * /api/prompts:
+ *   get:
+ *     summary: GET for /api/prompts
+ *     tags: [Prompts]
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/AiPrompt'
+ *       500:
+ *         description: "Failed to fetch prompts"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Failed to fetch prompts" }
+ */
 export async function GET() {
   try {
     const prompts = await prisma.aiPrompt.findMany({
@@ -16,6 +38,33 @@ export async function GET() {
 }
 
 // 🟢 สร้าง Prompt ใหม่
+/**
+ * @swagger
+ * /api/prompts:
+ *   post:
+ *     summary: POST for /api/prompts
+ *     tags: [Prompts]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AiPrompt'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AiPrompt'
+ *       500:
+ *         description: "Failed to create prompt"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Failed to create prompt" }
+ */
 export async function POST(req) {
   try {
     const body = await req.json();
@@ -34,39 +83,5 @@ export async function POST(req) {
   } catch (error) {
     console.error("Create Prompt Error:", error);
     return NextResponse.json({ error: "Failed to create prompt" }, { status: 500 });
-=======
-import { PrismaClient } from '@prisma/client';
-import { NextResponse } from 'next/server';
-
-const prisma = new PrismaClient();
-
-// ระบบดึงข้อมูลทั้งหมดมาโชว์ (GET)
-export async function GET() {
-  try {
-    const prompts = await prisma.aIPrompt.findMany({
-      orderBy: { createdAt: 'asc' } // เรียงตามเวลาที่สร้าง
-    });
-    return NextResponse.json(prompts);
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch" }, { status: 500 });
-  }
-}
-
-// ระบบเพิ่ม Prompt ใหม่ (POST)
-export async function POST(request) {
-  try {
-    const body = await request.json();
-    const newPrompt = await prisma.aIPrompt.create({
-      data: {
-        name: body.name,
-        action: body.action,
-        active: true,
-        isDefault: false,
-      }
-    });
-    return NextResponse.json(newPrompt);
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to create" }, { status: 500 });
->>>>>>> 0f0b53d466af6c42d8dfc0b30a0e2c17c0cebb97
   }
 }

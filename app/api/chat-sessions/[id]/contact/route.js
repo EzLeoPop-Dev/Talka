@@ -2,6 +2,54 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { pusherServer } from "@/lib/pusher";
 
+/**
+ * @swagger
+ * /api/chat-sessions/{id}/contact:
+ *   patch:
+ *     summary: PATCH for /api/chat-sessions/{id}/contact
+ *     tags: [Chat-sessions]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "1"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ChatSession'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ChatSession'
+ *       400:
+ *         description: "Invalid Chat ID"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Invalid Chat ID" }
+ *       404:
+ *         description: "Chat not found"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Chat not found" }
+ *       500:
+ *         description: "Failed to update contact"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Failed to update contact" }
+ */
 export async function PATCH(req, context) {
     try {
         const params = await context.params;

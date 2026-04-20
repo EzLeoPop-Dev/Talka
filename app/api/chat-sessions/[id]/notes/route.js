@@ -5,6 +5,43 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { pusherServer } from "@/lib/pusher";
 
 // 🟢 GET: ดึง Note ทั้งหมด (รวมถึงอันที่ถูก Soft Delete เป็นสีเทาๆ)
+/**
+ * @swagger
+ * /api/chat-sessions/{id}/notes:
+ *   get:
+ *     summary: GET for /api/chat-sessions/{id}/notes
+ *     tags: [Chat-sessions]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "1"
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ChatSession'
+ *       400:
+ *         description: "Invalid Chat ID"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Invalid Chat ID" }
+ *       500:
+ *         description: "Internal Server Error"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Internal Server Error" }
+ */
 export async function GET(req, context) {
     try {
         const params = await context.params;
@@ -22,6 +59,47 @@ export async function GET(req, context) {
 }
 
 // 🟢 POST: สร้าง Note ใหม่
+/**
+ * @swagger
+ * /api/chat-sessions/{id}/notes:
+ *   post:
+ *     summary: POST for /api/chat-sessions/{id}/notes
+ *     tags: [Chat-sessions]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "1"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ChatSession'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ChatSession'
+ *       400:
+ *         description: "ข้อมูลไม่ครบถ้วน"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "ข้อมูลไม่ครบถ้วน" }
+ *       500:
+ *         description: "บันทึก Note ไม่สำเร็จ"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "บันทึก Note ไม่สำเร็จ" }
+ */
 export async function POST(req, context) {
     try {
         const params = await context.params;
@@ -67,6 +145,47 @@ export async function POST(req, context) {
 }
 
 // 🟡 PATCH: แก้ไขข้อมูล หรือทำ Soft Delete/Restore
+/**
+ * @swagger
+ * /api/chat-sessions/{id}/notes:
+ *   patch:
+ *     summary: PATCH for /api/chat-sessions/{id}/notes
+ *     tags: [Chat-sessions]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "1"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ChatSession'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ChatSession'
+ *       400:
+ *         description: "ข้อมูลไม่ครบถ้วน"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "ข้อมูลไม่ครบถ้วน" }
+ *       500:
+ *         description: "แก้ไข Note ไม่สำเร็จ"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "แก้ไข Note ไม่สำเร็จ" }
+ */
 export async function PATCH(req, context) {
     try {
         const params = await context.params;
@@ -134,6 +253,42 @@ export async function PATCH(req, context) {
 }
 
 // 🔴 DELETE: ลบถาวร (Hard Delete)
+/**
+ * @swagger
+ * /api/chat-sessions/{id}/notes:
+ *   delete:
+ *     summary: DELETE for /api/chat-sessions/{id}/notes
+ *     tags: [Chat-sessions]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "1"
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *             example: { "success": true }
+ *       400:
+ *         description: "Missing noteId"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Missing noteId" }
+ *       500:
+ *         description: "ลบ Note ไม่สำเร็จ"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "ลบ Note ไม่สำเร็จ" }
+ */
 export async function DELETE(req, context) {
     try {
         const params = await context.params;

@@ -7,11 +7,34 @@ export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 export const revalidate = 0;
 
+/**
+ * @swagger
+ * /api/channels:
+ *   get:
+ *     summary: GET for /api/channels
+ *     tags: [Channels]
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Channel'
+ *       500:
+ *         description: "Failed to fetch channels"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Failed to fetch channels" }
+ */
 export async function GET(req) {
     try {
         const session = await getServerSession(authOptions);
         if (!session || !session.user || !session.user.email) {
-            return NextResponse.json([], { status: 401 }); 
+            return NextResponse.json([], { status: 401 });
         }
 
         // 🔥 1. รับ ID ทีมมาจาก URL (หน้าเว็บต้องส่ง ?wsId=... มาด้วย)
@@ -31,14 +54,14 @@ export async function GET(req) {
 
         // 🔥 2. เช็คก่อนว่ายูสเซอร์คนนี้ มีสิทธิ์ในทีมที่ขอข้อมูลมาจริงๆ ใช่ไหม?
         const myWorkspace = await prisma.workspaceMember.findFirst({
-            where: { 
+            where: {
                 user_id: dbUser.user_id,
-                workspace_id: parseInt(wsId) 
+                workspace_id: parseInt(wsId)
             }
         });
 
         if (!myWorkspace) {
-            return NextResponse.json([], { status: 403 }); 
+            return NextResponse.json([], { status: 403 });
         }
 
         // 🔥 3. ดึง "ทุกช่องทาง" ของทีมนี้มาแสดง (ลบเงื่อนไข status ออกแล้ว)
@@ -49,7 +72,7 @@ export async function GET(req) {
             orderBy: { created_at: "desc" }
         });
 
-        return NextResponse.json(channels, { 
+        return NextResponse.json(channels, {
             status: 200,
             headers: {
                 "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",

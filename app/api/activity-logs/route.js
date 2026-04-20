@@ -5,6 +5,36 @@ import { pusherServer } from "@/lib/pusher";
 export const dynamic = "force-dynamic";
 
 // 🟢 1. ฟังก์ชันดึงประวัติ (GET) 
+/**
+ * @swagger
+ * /api/activity-logs:
+ *   get:
+ *     summary: GET for /api/activity-logs
+ *     tags: [Activity-logs]
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ActivityLog'
+ *       400:
+ *         description: "Missing chatId"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Missing chatId" }
+ *       500:
+ *         description: "Internal Server Error"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Internal Server Error" }
+ */
 export async function GET(req) {
     try {
         const { searchParams } = new URL(req.url);
@@ -37,6 +67,40 @@ export async function GET(req) {
 }
 
 // 🟢 2. ฟังก์ชันบันทึกประวัติ (POST)
+/**
+ * @swagger
+ * /api/activity-logs:
+ *   post:
+ *     summary: POST for /api/activity-logs
+ *     tags: [Activity-logs]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ActivityLog'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ActivityLog'
+ *       400:
+ *         description: "ข้อมูลไม่ครบถ้วน (ต้องการ chat_session_id และ action) OR ไม่พบข้อมูล User ในระบบเลย กรุณาสร้าง User ก่อน"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "ข้อมูลไม่ครบถ้วน (ต้องการ chat_session_id และ action) OR ไม่พบข้อมูล User ในระบบเลย กรุณาสร้าง User ก่อน" }
+ *       500:
+ *         description: "Internal Server Error"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Internal Server Error" }
+ */
 export async function POST(req) {
     try {
         const body = await req.json();

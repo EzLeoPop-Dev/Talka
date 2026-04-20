@@ -7,6 +7,61 @@ import { pusherServer } from "@/lib/pusher";
 // ------------------------------------------------------
 // 🟢 1. แก้ไขสิทธิ์ (PATCH)
 // ------------------------------------------------------
+/**
+ * @swagger
+ * /api/workspaces/members/{id}:
+ *   patch:
+ *     summary: PATCH for /api/workspaces/members/{id}
+ *     tags: [Workspaces]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "1"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Workspace'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Workspace'
+ *       401:
+ *         description: "Unauthorized"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Unauthorized" }
+ *       403:
+ *         description: "FORBIDDEN OR ไม่อนุญาตให้แก้ไขสิทธิ์ของเจ้าของพื้นที่ทำงาน (Owner)"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "FORBIDDEN OR ไม่อนุญาตให้แก้ไขสิทธิ์ของเจ้าของพื้นที่ทำงาน (Owner)" }
+ *       404:
+ *         description: "User not found"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "User not found" }
+ *       500:
+ *         description: "ไม่สามารถอัปเดตสิทธิ์ได้"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "ไม่สามารถอัปเดตสิทธิ์ได้" }
+ */
 export async function PATCH(req, context) {
     try {
         const params = await context.params;
@@ -68,6 +123,56 @@ export async function PATCH(req, context) {
 // ------------------------------------------------------
 // 🔴 2. ลบคนออกจากทีม (DELETE)
 // ------------------------------------------------------
+/**
+ * @swagger
+ * /api/workspaces/members/{id}:
+ *   delete:
+ *     summary: DELETE for /api/workspaces/members/{id}
+ *     tags: [Workspaces]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "1"
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *             example: { "success": true }
+ *       400:
+ *         description: "Missing Workspace ID"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Missing Workspace ID" }
+ *       401:
+ *         description: "Unauthorized"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Unauthorized" }
+ *       403:
+ *         description: "FORBIDDEN OR ไม่สามารถลบเจ้าของพื้นที่ทำงาน (Owner) ออกจากทีมได้"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "FORBIDDEN OR ไม่สามารถลบเจ้าของพื้นที่ทำงาน (Owner) ออกจากทีมได้" }
+ *       500:
+ *         description: "ลบผู้ใช้และเคลียร์ประวัติสำเร็จ"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "ลบผู้ใช้และเคลียร์ประวัติสำเร็จ" }
+ */
 export async function DELETE(req, context) {
     try {
         const params = await context.params;

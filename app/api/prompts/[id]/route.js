@@ -3,6 +3,33 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 // 🟢 แก้ไข Prompt (อัปเดตชื่อ, คำสั่ง หรือ เปิด/ปิดสถานะ)
+/**
+ * @swagger
+ * /api/prompts/{id}:
+ *   put:
+ *     summary: PUT for /api/prompts/{id}
+ *     tags: [Prompts]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "1"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AiPrompt'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AiPrompt'
+ */
 export async function PUT(req, { params }) {
   try {
     const resolvedParams = await params;
@@ -22,6 +49,28 @@ export async function PUT(req, { params }) {
 }
 
 // 🟢 ลบ Prompt
+/**
+ * @swagger
+ * /api/prompts/{id}:
+ *   delete:
+ *     summary: DELETE for /api/prompts/{id}
+ *     tags: [Prompts]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "1"
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *             example: { "success": true }
+ */
 export async function DELETE(req, { params }) {
   try {
     const resolvedParams = await params;

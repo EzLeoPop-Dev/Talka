@@ -8,6 +8,61 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { pusherServer } from "@/lib/pusher";
 import { decryptToken } from "@/lib/encryption";
 
+/**
+ * @swagger
+ * /api/messages/send:
+ *   post:
+ *     summary: POST for /api/messages/send
+ *     tags: [Messages]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Message'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Message'
+ *       400:
+ *         description: "Missing Parameters OR ไม่พบการเชื่อมต่อเพจสำหรับแชทนี้ (Access Token Missing) OR Error 400"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Missing Parameters OR ไม่พบการเชื่อมต่อเพจสำหรับแชทนี้ (Access Token Missing) OR Error 400" }
+ *       401:
+ *         description: "Unauthorized"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Unauthorized" }
+ *       403:
+ *         description: "KICKED"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "KICKED" }
+ *       404:
+ *         description: "User not found OR Chat session not found OR Customer social account not found"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "User not found OR Chat session not found OR Customer social account not found" }
+ *       500:
+ *         description: "Internal Server Error"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Internal Server Error" }
+ */
 export async function POST(req) {
   try {
     // 1. เช็ค Session ป้องกันคนนอกยิง API มั่ว

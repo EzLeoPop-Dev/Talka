@@ -4,6 +4,54 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { pusherServer } from "@/lib/pusher";
 
+/**
+ * @swagger
+ * /api/workspaces/invite:
+ *   post:
+ *     summary: POST for /api/workspaces/invite
+ *     tags: [Workspaces]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Workspace'
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Workspace'
+ *       400:
+ *         description: "กรุณากรอกอีเมลที่ต้องการเชิญ OR ไม่พบ Workspace ของคุณ OR ผู้ใช้นี้อยู่ในทีมของคุณอยู่แล้ว OR คุณส่งคำเชิญไปหาผู้ใช้นี้แล้ว กรุณารอการตอบรับ"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "กรุณากรอกอีเมลที่ต้องการเชิญ OR ไม่พบ Workspace ของคุณ OR ผู้ใช้นี้อยู่ในทีมของคุณอยู่แล้ว OR คุณส่งคำเชิญไปหาผู้ใช้นี้แล้ว กรุณารอการตอบรับ" }
+ *       401:
+ *         description: "Unauthorized"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Unauthorized" }
+ *       404:
+ *         description: "ไม่พบผู้ใช้งานนี้ในระบบ (เขาต้องสมัครสมาชิกก่อน)"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "ไม่พบผู้ใช้งานนี้ในระบบ (เขาต้องสมัครสมาชิกก่อน)" }
+ *       500:
+ *         description: "Internal Server Error"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "Internal Server Error" }
+ */
 export async function POST(req) {
     try {
         const session = await getServerSession(authOptions);

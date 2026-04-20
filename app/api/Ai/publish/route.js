@@ -1,6 +1,35 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+/**
+ * @swagger
+ * /api/Ai/publish:
+ *   post:
+ *     summary: POST for /api/Ai/publish
+ *     tags: [Ai]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             example: { "exampleKey": "exampleValue" }
+ *     responses:
+ *       200:
+ *         description: "Successful response"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *             example: { "success": true }
+ *       500:
+ *         description: "ไม่สามารถบันทึกข้อมูลได้"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example: { "error": "ไม่สามารถบันทึกข้อมูลได้" }
+ */
 export async function POST(req) {
     try {
         const body = await req.json();
