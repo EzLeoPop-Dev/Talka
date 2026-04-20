@@ -1,37 +1,27 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma"; // 🟢 ใช้ตัวแปร prisma จาก lib กลาง
 import { pusherServer } from "@/lib/pusher";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-const prisma = new PrismaClient();
-
-// ดึงข้อมูล Tag ทั้งหมด (GET)
-/**
- * @swagger
- * /api/tags:
- *   get:
- *     summary: GET for /api/tags
- *     tags: [Tags]
- *     responses:
- *       200:
- *         description: "Successful response"
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Tag'
- *       500:
- *         description: "Failed to fetch tags"
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example: { "error": "Failed to fetch tags" }
- */
+// ดึงข้อมูล Tag ของตัวเอง (GET)
 export async function GET() {
     try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+        // 1. หาข้อมูล User เพื่อเอา current_workspace_id
+        const user = await prisma.user.findUnique({
+            where: { email: session.user.email },
+            select: { current_workspace_id: true }
+        });
+
+        if (!user?.current_workspace_id) return NextResponse.json([]);
+
+        // 2. ดึงเฉพาะ Tag ที่เป็นของ Workspace นี้เท่านั้น
         const tags = await prisma.tag.findMany({
-            orderBy: { tag_id: 'desc' }
+            where: { workspace_id: user.current_workspace_id },
+            orderBy: { tag_id: 'desc' } 
         });
 
         const formattedTags = tags.map((tag) => {
@@ -56,50 +46,38 @@ export async function GET() {
 }
 
 // สร้าง Tag ใหม่ (POST)
-/**
- * @swagger
- * /api/tags:
- *   post:
- *     summary: POST for /api/tags
- *     tags: [Tags]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Tag'
- *     responses:
- *       200:
- *         description: "Successful response"
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Tag'
- *       500:
- *         description: "Failed to create tag"
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example: { "error": "Failed to create tag" }
- */
 export async function POST(request) {
     try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+        const user = await prisma.user.findUnique({
+            where: { email: session.user.email },
+            select: { current_workspace_id: true }
+        });
+
+        if (!user?.current_workspace_id) return NextResponse.json({ error: "No Workspace Found" }, { status: 400 });
+
         const body = await request.json();
         const { name, color, description, emoji } = body;
 
         const combinedName = emoji ? `${emoji} ${name}` : name;
 
+        // 3. สร้าง Tag โดยผูกกับ workspace_id
         const newTag = await prisma.tag.create({
             data: {
+                workspace_id: user.current_workspace_id, // 👈 บรรทัดนี้สำคัญมาก!
                 tag_name: combinedName,
                 color: color,
                 description: description,
             },
         });
 
+        // 4. ส่ง Pusher แยกตาม Workspace
         try {
-            await pusherServer.trigger('global-tags', 'tag-updated', { message: "New tag created" });
+            await pusherServer.trigger(`workspace-${user.current_workspace_id}-tags`, 'tag-updated', { 
+                message: "New tag created" 
+            });
         } catch (e) { console.error("Pusher error:", e); }
 
         return NextResponse.json({
@@ -112,6 +90,10 @@ export async function POST(request) {
 
     } catch (error) {
         console.error("Error creating tag:", error);
+        // เช็คกรณีชื่อซ้ำ (Prisma Error P2002)
+        if (error.code === 'P2002') {
+            return NextResponse.json({ error: "Tag นี้มีอยู่แล้วในระบบ" }, { status: 400 });
+        }
         return NextResponse.json({ error: "Failed to create tag" }, { status: 500 });
     }
 }
