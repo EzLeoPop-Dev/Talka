@@ -3,6 +3,77 @@ import { prisma } from "@/lib/prisma";
 import { pusherServer } from "@/lib/pusher";
 import { decryptToken } from "@/lib/encryption";
 
+/**
+ * @swagger
+ * /api/line/webhook:
+ *   post:
+ *     summary: LINE Webhook สำหรับรับข้อความลูกค้า + AI Auto Reply
+ *     description: รับ event จาก LINE Messaging API, บันทึกข้อความ, สร้าง chat session และตอบกลับด้วย AI (ถ้ามี)
+ *     tags: [LINE]
+ *     parameters:
+ *       - in: query
+ *         name: channel_id
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: ใช้ระบุ channel เฉพาะ (multi-channel support)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               destination:
+ *                 type: string
+ *                 example: "Uxxxxxxxxxxxxxx"
+ *               events:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     type:
+ *                       type: string
+ *                       example: "message"
+ *                     replyToken:
+ *                       type: string
+ *                       example: "xxxxxxxxxx"
+ *                     source:
+ *                       type: object
+ *                       properties:
+ *                         userId:
+ *                           type: string
+ *                           example: "U1234567890"
+ *                     message:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                           example: "1234567890"
+ *                         type:
+ *                           type: string
+ *                           example: "text"
+ *                         text:
+ *                           type: string
+ *                           example: "สวัสดี"
+ *     responses:
+ *       200:
+ *         description: รับ webhook สำเร็จ
+ *         content:
+ *           text/plain:
+ *             example: "OK"
+ *       401:
+ *         description: Signature ไม่ถูกต้อง
+ *         content:
+ *           text/plain:
+ *             example: "Unauthorized"
+ *       404:
+ *         description: ไม่พบ Channel
+ *         content:
+ *           text/plain:
+ *             example: "Config Error"
+ */
+
 export async function POST(req) {
   try {
     const body = await req.text();

@@ -4,6 +4,105 @@ import { pusherServer } from "@/lib/pusher";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
+/**
+ * @swagger
+ * /api/tags:
+ *   get:
+ *     summary: ดึง Tag ของ Workspace ปัจจุบัน
+ *     tags: [Tags]
+ *     responses:
+ *       200:
+ *         description: ดึง Tag สำเร็จ
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     example: 1
+ *                   name:
+ *                     type: string
+ *                     example: "Bug"
+ *                   color:
+ *                     type: string
+ *                     example: "#ff0000"
+ *                   description:
+ *                     type: string
+ *                     example: "Tag สำหรับ bug"
+ *                   emoji:
+ *                     type: string
+ *                     example: "🐛"
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "Unauthorized"
+ *       500:
+ *         description: Server Error
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "Failed to fetch tags"
+ *
+ *   post:
+ *     summary: สร้าง Tag ใหม่
+ *     tags: [Tags]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Bug"
+ *               color:
+ *                 type: string
+ *                 example: "#ff0000"
+ *               description:
+ *                 type: string
+ *                 example: "Tag สำหรับ bug"
+ *               emoji:
+ *                 type: string
+ *                 example: "🐛"
+ *     responses:
+ *       201:
+ *         description: สร้าง Tag สำเร็จ
+ *         content:
+ *           application/json:
+ *             example:
+ *               id: 1
+ *               name: "Bug"
+ *               color: "#ff0000"
+ *               description: "Tag สำหรับ bug"
+ *               emoji: "🐛"
+ *       400:
+ *         description: ข้อมูลไม่ถูกต้อง หรือชื่อซ้ำ
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "Tag นี้มีอยู่แล้วในระบบ"
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "Unauthorized"
+ *       500:
+ *         description: Server Error
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "Failed to create tag"
+ */
+
 // ดึงข้อมูล Tag ของตัวเอง (GET)
 export async function GET() {
     try {
@@ -21,7 +120,7 @@ export async function GET() {
         // 2. ดึงเฉพาะ Tag ที่เป็นของ Workspace นี้เท่านั้น
         const tags = await prisma.tag.findMany({
             where: { workspace_id: user.current_workspace_id },
-            orderBy: { tag_id: 'desc' } 
+            orderBy: { tag_id: 'desc' }
         });
 
         const formattedTags = tags.map((tag) => {
@@ -75,8 +174,8 @@ export async function POST(request) {
 
         // 4. ส่ง Pusher แยกตาม Workspace
         try {
-            await pusherServer.trigger(`workspace-${user.current_workspace_id}-tags`, 'tag-updated', { 
-                message: "New tag created" 
+            await pusherServer.trigger(`workspace-${user.current_workspace_id}-tags`, 'tag-updated', {
+                message: "New tag created"
             });
         } catch (e) { console.error("Pusher error:", e); }
 
