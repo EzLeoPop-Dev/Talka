@@ -1,11 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // 1. บังคับชื่อโฟลเดอร์ output (ช่วยแก้ปัญหา ENOENT / .next)
-  distDir: '.next',
-
-  // 2. ตั้งค่า standalone mode (แนะนำสำหรับ Next.js 15 บน Vercel เพื่อช่วยการทำ tracing)
-  output: 'standalone',
-
+  // ลบ distDir และ output ออกเพื่อให้ Vercel จัดการเอง
+  
   images: {
     remotePatterns: [
       {
@@ -17,7 +13,8 @@ const nextConfig = {
     ],
   },
 
-  // 3. แก้ไข allowedDevOrigins ให้ถูกต้องตามโครงสร้างใหม่ (อยู่ภายใต้ experimental)
+  // สำหรับ Next.js 15 Server Actions เป็น Stable แล้ว ไม่ต้องใส่ experimental ก็ได้ครับ
+  // หรือถ้าจะใส่ให้ใส่แบบเรียบง่ายที่สุด
   experimental: {
     serverActions: {
       allowedOrigins: [
