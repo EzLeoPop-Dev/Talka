@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useSession } from "next-auth/react";
@@ -145,17 +145,17 @@ const guides = [
     }
 ];
 
-export default function GuidePage() {
+// 🟢 1. แยกเนื้อหาหลักออกมาเป็น Component ย่อย
+function GuideContent() {
     const { data: session } = useSession();
     const router = useRouter();
     
     const [userRole, setUserRole] = useState("EMPLOYEE");
     const [isLoading, setIsLoading] = useState(true);
-    const [selectedGuide, setSelectedGuide] = useState(null); // ควบคุม Modal
+    const [selectedGuide, setSelectedGuide] = useState(null);
 
     const userName = session?.user?.name || "Guest";
 
-    // ดึงสิทธิ์ User เพื่อแยกว่าควรเห็น Guide ของ Admin ไหม
     useEffect(() => {
         const fetchRole = async () => {
             try {
@@ -249,7 +249,7 @@ export default function GuidePage() {
                                 <motion.div key={guide.id} variants={itemVariants}>
                                     <GlassBackground 
                                         className="h-full group hover:bg-white/10 border-white/10 hover:border-white/30 transition-all duration-300 cursor-pointer overflow-hidden"
-                                        onClick={() => setSelectedGuide(guide)} // 🔥 เปลี่ยนเป็นเปิด Modal แทน
+                                        onClick={() => setSelectedGuide(guide)}
                                     >
                                         <div className="p-6 flex flex-col h-full relative">
                                             <div className={`absolute -right-10 -top-10 w-32 h-32 rounded-full blur-[50px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br ${guide.color}`} />
@@ -277,18 +277,16 @@ export default function GuidePage() {
                     )}
                 </div>
 
-                {/* 🔥 Modal แสดงรายละเอียด (Tutorial Modal) */}
+                {/* Modal แสดงรายละเอียด */}
                 <AnimatePresence>
                     {selectedGuide && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-12">
-                            {/* Backdrop */}
                             <motion.div 
                                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                                 className="absolute inset-0 bg-black/60 backdrop-blur-sm"
                                 onClick={() => setSelectedGuide(null)}
                             />
 
-                            {/* Modal Content */}
                             <motion.div 
                                 initial={{ opacity: 0, scale: 0.95, y: 20 }} 
                                 animate={{ opacity: 1, scale: 1, y: 0 }} 
@@ -337,7 +335,7 @@ export default function GuidePage() {
                                     </div>
                                 </div>
 
-                                {/* Footer Button (Go to Page) */}
+                                {/* Footer Button */}
                                 <div className="p-6 border-t border-white/5 bg-[#0B0914] shrink-0 flex justify-end">
                                     <button
                                         onClick={() => router.push(selectedGuide.href)}
@@ -358,5 +356,21 @@ export default function GuidePage() {
                 .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
             `}</style>
         </ClientLayout>
+    );
+}
+
+// 🟢 2. สร้าง Component หลักเพื่อห่อด้วย Suspense ป้องกัน Error CSR Bailout
+export default function GuidePage() {
+    return (
+        <Suspense fallback={
+            <div className="h-screen w-full flex items-center justify-center bg-[#120F1D] text-[#BE7EC7]">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-10 h-10 border-4 border-current border-t-transparent rounded-full animate-spin"></div>
+                    <p className="font-bold tracking-widest text-sm uppercase">Loading Guide...</p>
+                </div>
+            </div>
+        }>
+            <GuideContent />
+        </Suspense>
     );
 }
