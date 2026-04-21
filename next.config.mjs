@@ -1,7 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // ลบ distDir และ output ออกเพื่อให้ Vercel จัดการเอง
-  
+  // 🟢 ขั้นตอนสำคัญ: ปิดการแกะรอยไฟล์เพื่อข้าม Error export-detail.json
+  outputFileTracing: false, 
+
   images: {
     remotePatterns: [
       {
@@ -13,8 +14,7 @@ const nextConfig = {
     ],
   },
 
-  // สำหรับ Next.js 15 Server Actions เป็น Stable แล้ว ไม่ต้องใส่ experimental ก็ได้ครับ
-  // หรือถ้าจะใส่ให้ใส่แบบเรียบง่ายที่สุด
+  // ตั้งค่าสำหรับ Server Actions (ถ้ามีการใช้)
   experimental: {
     serverActions: {
       allowedOrigins: [
