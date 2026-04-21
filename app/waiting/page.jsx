@@ -3,10 +3,11 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Clock, Plus, Building2, ArrowRight, X } from "lucide-react";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import ClientLayout from "@/app/(user)/ClientLayout";
 
-export default function WaitingPage() {
+// 1. แยกเนื้อหาเดิมออกมาเป็น Component ย่อย (เปลี่ยนชื่อเป็น WaitingContent)
+function WaitingContent() {
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -105,5 +106,18 @@ export default function WaitingPage() {
         </div>
       </div>
     </ClientLayout>
+  );
+}
+
+// 2. สร้าง Component หลัก (Export Default) เพื่อห่อด้วย Suspense
+export default function WaitingPage() {
+  return (
+    <Suspense fallback={
+      <div className="h-screen w-full flex items-center justify-center bg-[#161223]">
+        <div className="w-10 h-10 border-4 border-[#BE7EC7] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    }>
+      <WaitingContent />
+    </Suspense>
   );
 }
