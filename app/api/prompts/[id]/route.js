@@ -104,7 +104,97 @@ export async function PUT(request, { params }) {
         active: body.active
       }
     });
-    return NextResponse.json(updatedPrompt);
+    return NextResponse.json(updatedPrompt);import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+
+// 🟢 แก้ไข Prompt (อัปเดตชื่อ, คำสั่ง หรือ เปิด/ปิดสถานะ)
+/**
+ * @swagger
+ * /api/prompts/{id}:
+ * put:
+ * summary: PUT for /api/prompts/{id}
+ * tags: [Prompts]
+ * parameters:
+ * - in: path
+ * name: id
+ * required: true
+ * schema:
+ * type: string
+ * example: "1"
+ * requestBody:
+ * required: true
+ * content:
+ * application/json:
+ * schema:
+ * $ref: '#/components/schemas/AiPrompt'
+ * responses:
+ * 200:
+ * description: "Successful response"
+ * content:
+ * application/json:
+ * schema:
+ * $ref: '#/components/schemas/AiPrompt'
+ */
+export async function PUT(req, { params }) {
+  try {
+    const resolvedParams = await params;
+    const id = parseInt(resolvedParams.id);
+    const body = await req.json();
+
+    const updatedPrompt = await prisma.aiPrompt.update({
+      where: { id: id },
+      data: { 
+        name: body.name,
+        action: body.action,
+        active: body.active
+      } 
+    });
+
+    return NextResponse.json(updatedPrompt, { status: 200 });
+  } catch (error) {
+    console.error("Update Prompt Error:", error);
+    return NextResponse.json({ error: "Failed to update prompt" }, { status: 500 });
+  }
+}
+
+// 🟢 ลบ Prompt
+/**
+ * @swagger
+ * /api/prompts/{id}:
+ * delete:
+ * summary: DELETE for /api/prompts/{id}
+ * tags: [Prompts]
+ * parameters:
+ * - in: path
+ * name: id
+ * required: true
+ * schema:
+ * type: string
+ * example: "1"
+ * responses:
+ * 200:
+ * description: "Successful response"
+ * content:
+ * application/json:
+ * schema:
+ * type: object
+ * example: { "success": true }
+ */
+export async function DELETE(req, { params }) {
+  try {
+    const resolvedParams = await params;
+    const id = parseInt(resolvedParams.id);
+
+    await prisma.aiPrompt.delete({
+      where: { id: id }
+    });
+
+    return NextResponse.json({ success: true, message: "Deleted successfully" }, { status: 200 });
+  } catch (error) {
+    console.error("Delete Prompt Error:", error);
+    return NextResponse.json({ error: "Failed to delete prompt" }, { status: 500 });
+  }
+}
   } catch (error) {
     return NextResponse.json({ error: "Failed to update" }, { status: 500 });
   }
