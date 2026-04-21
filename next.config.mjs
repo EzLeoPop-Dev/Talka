@@ -1,8 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // 🟢 ขั้นตอนสำคัญ: ปิดการแกะรอยไฟล์เพื่อข้าม Error export-detail.json
-  outputFileTracing: false, 
-
   images: {
     remotePatterns: [
       {
@@ -14,7 +11,6 @@ const nextConfig = {
     ],
   },
 
-  // ตั้งค่าสำหรับ Server Actions (ถ้ามีการใช้)
   experimental: {
     serverActions: {
       allowedOrigins: [
