@@ -12,7 +12,7 @@ const nextConfig = {
   },
  
   allowedDevOrigins: [
-    'proposal-clustered-broiling.ngrok-free.dev',
+    'unruly-coveted-stubble.ngrok-free.dev',
     'localhost:3001'
   ]
 };

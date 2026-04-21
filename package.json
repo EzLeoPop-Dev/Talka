@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "next dev -p 3001",
     "vercel-build": "prisma generate && prisma migrate deploy && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint"
   },
@@ -47,7 +48,7 @@
     "swagger-ui-react": "^5.32.1",
     "tailwind-merge": "^3.3.1",
     "winston": "^3.14.0",
-    "winston-daily-rotate-file": "^4.8.1"
+    "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
