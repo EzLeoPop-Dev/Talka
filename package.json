@@ -43,6 +43,7 @@
     "react": "19.1.0",
     "react-date-range": "^2.0.1",
     "react-dom": "19.1.0",
+    "react-is": "^19.2.5",
     "react-tooltip": "^5.30.0",
     "recharts": "^3.4.1",
     "swagger-ui-react": "^5.32.1",
